@@ -157,10 +157,10 @@ const PaymentHistory: React.FC = () => {
     <Box sx={{ py: 2, px: { xs: 1, md: 3 } }}>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2, mb: 4 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
             {t('payments.title')}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             {t('payments.subtitle')}
           </Typography>
         </Box>
@@ -168,10 +168,11 @@ const PaymentHistory: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon />}
           onClick={handleOpen}
+          size="small"
           sx={{
-            borderRadius: 3,
-            px: 3,
-            py: 1.5,
+            borderRadius: 2,
+            px: 2,
+            py: 1,
             background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
             fontWeight: 700,
             boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',

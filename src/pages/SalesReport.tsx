@@ -130,10 +130,10 @@ const SalesReport: React.FC = () => {
     <Box sx={{ py: 2, px: { xs: 1, md: 3 }, pb: { xs: 10, md: 4 } }}>
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2, mb: 4 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
             {t('sales.title')}
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             {t('sales.subtitle')}
           </Typography>
         </Box>
@@ -148,8 +148,9 @@ const SalesReport: React.FC = () => {
               }
             }
           }}
+          size="small"
           color="error"
-          sx={{ borderRadius: 3, px: 3, py: 1.5, fontWeight: 700, alignSelf: { xs: 'flex-start', sm: 'center' } }}
+          sx={{ borderRadius: 2, px: 2, py: 1, fontWeight: 700, alignSelf: { xs: 'flex-start', sm: 'center' } }}
         >
           Clear All Sales
         </Button>

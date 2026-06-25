@@ -456,17 +456,17 @@ const Dashboard: React.FC = () => {
               boxShadow: '0 10px 30px rgba(0,0,0,0.01)',
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', mb: 3 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary', mb: 2 }}>
               ⚡ Premium Actions Control Center
             </Typography>
 
             <Grid container spacing={2}>
               {/* Daily Sheet Card (Highlighted) */}
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Card
                   onClick={() => navigate('/daily')}
                   sx={{
-                    p: 2,
+                    p: 1.5,
                     cursor: 'pointer',
                     borderRadius: 3,
                     border: '1px solid rgba(0, 114, 255, 0.12)',
@@ -480,14 +480,14 @@ const Dashboard: React.FC = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
-                    <Avatar sx={{ bgcolor: 'rgba(0, 114, 255, 0.1)', color: '#0072FF' }}>
-                      <AssignmentIcon />
+                    <Avatar sx={{ bgcolor: 'rgba(0, 114, 255, 0.1)', color: '#0072FF', width: 32, height: 32 }}>
+                      <AssignmentIcon sx={{ fontSize: 18 }} />
                     </Avatar>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#0072FF' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#0072FF', lineHeight: 1.2 }}>
                       Daily Deliveries
                     </Typography>
                   </Box>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2, minHeight: 32 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' }, mb: 1, minHeight: 32, fontSize: '0.65rem' }}>
                     Mark today's milk delivery checklist, override quantities, and sync check-ins.
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', color: '#0072FF', gap: 0.5 }}>
@@ -498,11 +498,11 @@ const Dashboard: React.FC = () => {
               </Grid>
 
               {/* Add Customer Redesigned Card */}
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Card
                   onClick={() => navigate('/customers')}
                   sx={{
-                    p: 2,
+                    p: 1.5,
                     cursor: 'pointer',
                     borderRadius: 3,
                     border: '1px solid rgba(46, 204, 113, 0.12)',
@@ -516,14 +516,14 @@ const Dashboard: React.FC = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
-                    <Avatar sx={{ bgcolor: 'rgba(46, 204, 113, 0.1)', color: '#2ecc71' }}>
-                      <AddCircleOutlineIcon />
+                    <Avatar sx={{ bgcolor: 'rgba(46, 204, 113, 0.1)', color: '#2ecc71', width: 32, height: 32 }}>
+                      <AddCircleOutlineIcon sx={{ fontSize: 18 }} />
                     </Avatar>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#27ae60' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#27ae60', lineHeight: 1.2 }}>
                       New Customer
                     </Typography>
                   </Box>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2, minHeight: 32 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' }, mb: 1, minHeight: 32, fontSize: '0.65rem' }}>
                     Register a new milk buyer with preferences, mobile number, address, and quantity.
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', color: '#2ecc71', gap: 0.5 }}>
@@ -534,11 +534,11 @@ const Dashboard: React.FC = () => {
               </Grid>
 
               {/* Record Payment Card */}
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Card
                   onClick={() => navigate('/payments')}
                   sx={{
-                    p: 2,
+                    p: 1.5,
                     cursor: 'pointer',
                     borderRadius: 3,
                     border: '1px solid rgba(241, 196, 15, 0.12)',
@@ -552,14 +552,14 @@ const Dashboard: React.FC = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
-                    <Avatar sx={{ bgcolor: 'rgba(241, 196, 15, 0.1)', color: '#f1c40f' }}>
-                      <CreditCardIcon />
+                    <Avatar sx={{ bgcolor: 'rgba(241, 196, 15, 0.1)', color: '#f1c40f', width: 32, height: 32 }}>
+                      <CreditCardIcon sx={{ fontSize: 18 }} />
                     </Avatar>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#d4a300' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#d4a300', lineHeight: 1.2 }}>
                       Payments Ledger
                     </Typography>
                   </Box>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2, minHeight: 32 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' }, mb: 1, minHeight: 32, fontSize: '0.65rem' }}>
                     Log a transaction, check UPI/Cash dues, and clear unpaid invoices.
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', color: '#f1c40f', gap: 0.5 }}>
@@ -570,11 +570,11 @@ const Dashboard: React.FC = () => {
               </Grid>
 
               {/* Sales Statistics Card */}
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{ xs: 6 }}>
                 <Card
                   onClick={() => navigate('/sales')}
                   sx={{
-                    p: 2,
+                    p: 1.5,
                     cursor: 'pointer',
                     borderRadius: 3,
                     border: '1px solid rgba(155, 89, 182, 0.12)',
@@ -588,14 +588,14 @@ const Dashboard: React.FC = () => {
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
-                    <Avatar sx={{ bgcolor: 'rgba(155, 89, 182, 0.1)', color: '#9b59b6' }}>
-                      <QueryStatsIcon />
+                    <Avatar sx={{ bgcolor: 'rgba(155, 89, 182, 0.1)', color: '#9b59b6', width: 32, height: 32 }}>
+                      <QueryStatsIcon sx={{ fontSize: 18 }} />
                     </Avatar>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#8e44ad' }}>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#8e44ad', lineHeight: 1.2 }}>
                       Sales Reports
                     </Typography>
                   </Box>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 2, minHeight: 32 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' }, mb: 1, minHeight: 32, fontSize: '0.65rem' }}>
                     Analyze weekly, monthly, and yearly revenue numbers with customer filters.
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', color: '#9b59b6', gap: 0.5 }}>

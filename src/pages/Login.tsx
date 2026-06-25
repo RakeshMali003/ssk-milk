@@ -13,10 +13,13 @@ import {
   Fade,
   Tabs,
   Tab,
+  InputAdornment,
 } from '@mui/material';
 import LanguageIcon from '@mui/icons-material/Language';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useStore } from '../context/StoreContext';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
@@ -30,6 +33,7 @@ const Login: React.FC = () => {
   // Admin State
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   
   // Customer State
   const [mobile, setMobile] = useState('');
@@ -136,7 +140,7 @@ const Login: React.FC = () => {
         <Card
           sx={{
             width: '100%',
-            maxWidth: 450,
+            maxWidth: 350,
             mx: 2,
             border: '1px solid rgba(0, 0, 0, 0.06)',
             boxShadow: '0 20px 40px rgba(0, 0, 0, 0.06)',
@@ -152,7 +156,7 @@ const Login: React.FC = () => {
               background: 'linear-gradient(90deg, #00C6FF, #0072FF)',
             }}
           />
-          <CardContent sx={{ p: 5 }}>
+          <CardContent sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
               <Box
                 sx={{
@@ -166,7 +170,7 @@ const Login: React.FC = () => {
                 <LockOpenIcon sx={{ fontSize: 32 }} />
               </Box>
               <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 0.5 }}>
-                {t('login.welcome')}
+                Login
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                 {t('login.subtitle')}
@@ -179,8 +183,8 @@ const Login: React.FC = () => {
               variant="fullWidth" 
               sx={{ mb: 3 }}
             >
-              <Tab label="Admin Login" sx={{ fontWeight: 700 }} />
               <Tab label="Customer Login" sx={{ fontWeight: 700 }} />
+              <Tab label="Admin Login" sx={{ fontWeight: 700 }} />
             </Tabs>
 
             {error && (
@@ -189,7 +193,7 @@ const Login: React.FC = () => {
               </Alert>
             )}
 
-            {tabIndex === 0 && (
+            {tabIndex === 1 && (
               <Box component="form" onSubmit={handleAdminLogin} sx={{ mt: 1 }}>
                 <TextField
                   fullWidth
@@ -208,7 +212,7 @@ const Login: React.FC = () => {
                 <TextField
                   fullWidth
                   label={t('login.password')}
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   variant="outlined"
                   margin="normal"
                   value={password}
@@ -218,6 +222,21 @@ const Login: React.FC = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 2,
                     },
+                  }}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      )
+                    }
                   }}
                 />
                 <Button
@@ -245,7 +264,7 @@ const Login: React.FC = () => {
               </Box>
             )}
 
-            {tabIndex === 1 && (
+            {tabIndex === 0 && (
               <form onSubmit={handleCustomerLogin}>
                 <TextField
                   fullWidth
@@ -292,20 +311,7 @@ const Login: React.FC = () => {
               </form>
             )}
 
-            <Box
-              sx={{
-                mt: 4,
-                p: 2.5,
-                borderRadius: 3,
-                bgcolor: 'rgba(0, 0, 0, 0.02)',
-                border: '1px solid rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.5 }}>
-                💡 <strong>{i18n.language === 'en' ? 'Quick Help:' : 'त्वरित सहायता:'}</strong> {t('login.guide')}
-              </Typography>
-            </Box>
-          </CardContent>
+
         </Card>
       </Fade>
     </Box>

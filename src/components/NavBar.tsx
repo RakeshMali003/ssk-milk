@@ -68,37 +68,9 @@ const NavBar: React.FC<NavBarProps> = ({ mobileOpen, handleDrawerToggle }) => {
       <Box>
         {/* Header Branding */}
         <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Avatar
-            sx={{
-              width: 64,
-              height: 64,
-              bgcolor: 'primary.main',
-              mb: 1.5,
-              fontSize: '1.8rem',
-              fontWeight: 'bold',
-              background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
-              boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
-            }}
-          >
-            SSK
-          </Avatar>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 800,
-              textAlign: 'center',
-              background: 'linear-gradient(45deg, #00C6FF, #0072FF)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: 0.5,
-              fontSize: '1.2rem',
-            }}
-          >
-            Shree Sai Krupa
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-            KIRANA & MILK ERP
-          </Typography>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mb: 1 }}>
+            <img src="/logo.png" alt="Logo" style={{ height: 60, objectFit: 'contain' }} />
+          </Box>
 
           {/* Database connection status indicator */}
           <Box
