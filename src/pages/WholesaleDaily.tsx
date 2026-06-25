@@ -1,0 +1,267 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { useStore, type WholesaleCustomer, type WholesaleDailyEntryItem } from '../context/StoreContext';
+import { format } from 'date-fns';
+import {
+  Box, Typography, Button, TextField, IconButton, Grid, Card, CardContent, Divider, Chip, Paper
+} from '@mui/material';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+
+const WholesaleDaily: React.FC = () => {
+  const { wholesaleCustomers, milkList, saveWholesaleDailyEntry } = useStore();
+  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  
+  // Local state for the inputs: { customerId: { [milkName]: qty, paid } }
+  const [inputs, setInputs] = useState<{ [id: string]: { qtys: { [milk: string]: string }, paid: string } }>({});
+
+  const activeCustomers = wholesaleCustomers.filter(c => c.isActive);
+
+  useEffect(() => {
+    // Initialize inputs when date changes or customers load
+    const newInputs: any = {};
+    activeCustomers.forEach(c => {
+      if (!inputs[c.id]) {
+        const defaultQtys: any = {};
+        milkList.forEach(m => defaultQtys[m.name] = '');
+        newInputs[c.id] = { qtys: defaultQtys, paid: '' };
+      } else {
+        newInputs[c.id] = inputs[c.id];
+      }
+    });
+    setInputs(newInputs);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wholesaleCustomers.length, milkList.length, date]);
+
+  const { todayTotalQty, todayTotalAmount } = useMemo(() => {
+    let qty = 0;
+    let amount = 0;
+    activeCustomers.forEach(c => {
+      const custInputs = inputs[c.id];
+      if (custInputs) {
+        milkList.forEach(m => {
+          const q = parseFloat(custInputs.qtys[m.name] || '0');
+          if (q > 0) {
+            qty += q;
+            const rate = c.pricing[m.name] || m.price;
+            amount += (q * rate);
+          }
+        });
+      }
+    });
+    return { todayTotalQty: qty, todayTotalAmount: amount };
+  }, [inputs, activeCustomers, milkList]);
+
+  const handleQtyChange = (id: string, milkName: string, val: string) => {
+    setInputs(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        qtys: {
+          ...prev[id].qtys,
+          [milkName]: val
+        }
+      }
+    }));
+  };
+
+  const handlePaidChange = (id: string, val: string) => {
+    setInputs(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        paid: val
+      }
+    }));
+  };
+
+  const handleSaveEntry = (customer: WholesaleCustomer) => {
+    const custInputs = inputs[customer.id];
+    if (!custInputs) return;
+
+    const paidNum = parseFloat(custInputs.paid || '0');
+    
+    let totalBill = 0;
+    const items: WholesaleDailyEntryItem[] = [];
+
+    let hasAnyQty = false;
+
+    milkList.forEach(m => {
+      const q = parseFloat(custInputs.qtys[m.name] || '0');
+      if (q > 0) {
+        hasAnyQty = true;
+        const rate = customer.pricing[m.name] || m.price; // fallback to retail if not set
+        const amount = q * rate;
+        totalBill += amount;
+        items.push({ milkName: m.name, qty: q, rate, amount });
+      }
+    });
+
+    if (!hasAnyQty && paidNum === 0) {
+      alert("Please enter at least one quantity or a payment amount before saving.");
+      return;
+    }
+
+    saveWholesaleDailyEntry({
+      date,
+      wholesaleCustomerId: customer.id,
+      items,
+      totalBill,
+      amountPaid: paidNum,
+    });
+
+    // Clear inputs after save
+    const clearedQtys: any = {};
+    milkList.forEach(m => clearedQtys[m.name] = '');
+    setInputs(prev => ({
+      ...prev,
+      [customer.id]: { qtys: clearedQtys, paid: '' }
+    }));
+    
+    alert(`Saved entry for ${customer.name}`);
+  };
+
+  const sendWhatsApp = (c: WholesaleCustomer) => {
+    const formattedMobile = c.mobile.startsWith('91') ? c.mobile : `91${c.mobile}`;
+    const balanceText = c.balance > 0 
+      ? `*कुल बकाया (Pending):* ₹${c.balance}` 
+      : (c.balance < 0 ? `*अग्रिम (Advance):* ₹${Math.abs(c.balance)}` : `*कोई बकाया नहीं (Cleared)*`);
+
+    const message = `नमस्ते *${c.name}*,
+श्री साई कृपा किराना स्टोर की ओर से,
+
+${balanceText}
+
+कृपया समय पर भुगतान करें।
+*Online Payment (PhonePe):* 9898801505
+
+धन्यवाद!`;
+
+    const url = `https://wa.me/${formattedMobile}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
+
+  return (
+    <Box sx={{ py: 2, px: { xs: 1, md: 3 }, pb: 12 }}>
+      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2, mb: 4 }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
+            Wholesale Daily Sheet
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+            Enter daily quantities for all milk types and received payments
+          </Typography>
+        </Box>
+        <TextField
+          type="date"
+          label="Date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
+        />
+      </Box>
+
+      <Grid container spacing={3}>
+        {activeCustomers.length === 0 ? (
+          <Grid item xs={12}>
+            <Box sx={{ p: 4, textAlign: 'center', background: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+              <Typography color="text.secondary">No active wholesale customers found.</Typography>
+            </Box>
+          </Grid>
+        ) : (
+          activeCustomers.map((c) => (
+            <Grid item xs={12} sm={6} lg={4} key={c.id}>
+              <Card sx={{ borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                <Box sx={{ p: 2.5, background: 'rgba(0,0,0,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>{c.name}</Typography>
+                    <Chip 
+                      label={c.balance > 0 ? `Pending: ₹${c.balance}` : (c.balance < 0 ? `Advance: ₹${Math.abs(c.balance)}` : 'Balance: ₹0')} 
+                      size="small"
+                      color={c.balance > 0 ? "error" : (c.balance < 0 ? "success" : "default")}
+                      sx={{ fontWeight: 700, borderRadius: 2 }}
+                    />
+                  </Box>
+                  <IconButton onClick={() => sendWhatsApp(c)} sx={{ color: '#25D366', bgcolor: 'rgba(37, 211, 102, 0.1)' }}>
+                    <WhatsAppIcon />
+                  </IconButton>
+                </Box>
+                <Divider />
+                <CardContent sx={{ p: 2.5 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 2, letterSpacing: 0.5 }}>MILK QUANTITIES (Ltr)</Typography>
+                  <Grid container spacing={2}>
+                    {milkList.map(m => (
+                      <Grid item xs={6} key={m.id}>
+                        <TextField 
+                          fullWidth
+                          size="small" 
+                          type="number" 
+                          label={`${m.name} (₹${c.pricing[m.name] || m.price})`}
+                          value={inputs[c.id]?.qtys[m.name] || ''} 
+                          onChange={(e) => handleQtyChange(c.id, m.name, e.target.value)}
+                          sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, bgcolor: '#f8fafc' } }}
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                    ))}
+                    <Grid item xs={12}>
+                      <Divider sx={{ my: 1 }} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField 
+                        fullWidth
+                        label="Amount Paid Today (₹)"
+                        type="number" 
+                        value={inputs[c.id]?.paid || ''} 
+                        onChange={(e) => handlePaidChange(c.id, e.target.value)}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                    <Button 
+                      variant="contained" 
+                      onClick={() => handleSaveEntry(c)}
+                      sx={{ borderRadius: 2, background: '#0072FF', textTransform: 'none', px: 4, py: 1, fontWeight: 700 }}
+                    >
+                      Save Entry
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        )}
+      </Grid>
+
+      {/* Sticky Bottom Real-time Totals */}
+      <Paper 
+        sx={{ 
+          position: 'fixed', 
+          bottom: 0, 
+          left: { xs: 0, md: 280 }, 
+          right: 0, 
+          bgcolor: '#fff', 
+          p: 2, 
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.05)', 
+          zIndex: 10,
+          borderTop: '1px solid rgba(0,0,0,0.1)' 
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', maxWidth: 800, mx: 'auto' }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>TOTAL INPUT QTY</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>{todayTotalQty} Ltr</Typography>
+          </Box>
+          <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>TOTAL BILL AMOUNT</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: 'error.main' }}>₹{todayTotalAmount}</Typography>
+          </Box>
+        </Box>
+      </Paper>
+    </Box>
+  );
+};
+
+export default WholesaleDaily;

@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model MilkItem {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  price      Decimal          @db.Decimal
+  createdAt  DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
+  unit       String?          @default("litre")
+  customers  Customer[]
+  deliveries DailyInventory[]
+  sales      Sale[]
+
+  @@map("milk_items")
+}
+
+model Customer {
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  email      String?
+  mobile     String
+  address    String?
+  milkItemId String?          @map("milk_item_id") @db.Uuid
+  dailyQty   Decimal          @default(1) @map("daily_qty") @db.Decimal
+  isActive   Boolean?         @default(true) @map("is_active")
+  createdAt  DateTime?        @default(now()) @map("created_at") @db.Timestamp(6)
+  milkItem   MilkItem?        @relation(fields: [milkItemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  deliveries DailyInventory[]
+  payments   Payment[]
+  sales      Sale[]
+
+  @@map("customers")
+}
+
+model DailyInventory {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deliveryDate DateTime  @default(dbgenerated("CURRENT_DATE")) @map("delivery_date") @db.Date
+  customerId   String?   @map("customer_id") @db.Uuid
+  milkItemId   String?   @map("milk_item_id") @db.Uuid
+  qty          Decimal   @db.Decimal
+  delivered    Boolean?  @default(false)
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime? @default(now()) @map("updated_at") @db.Timestamp(6)
+  customer     Customer? @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  milkItem     MilkItem? @relation(fields: [milkItemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("daily_inventory")
+}
+
+model Sale {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  saleDate   DateTime  @default(dbgenerated("CURRENT_DATE")) @map("sale_date") @db.Date
+  customerId String?   @map("customer_id") @db.Uuid
+  milkItemId String?   @map("milk_item_id") @db.Uuid
+  qty        Decimal   @db.Decimal
+  price      Decimal   @db.Decimal
+  total      Decimal   @db.Decimal
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  milkItem   MilkItem? @relation(fields: [milkItemId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("sales")
+}
+
+model Payment {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customerId  String?   @map("customer_id") @db.Uuid
+  amount      Decimal   @db.Decimal
+  status      String?   @default("pending")
+  mode        String?
+  note        String?
+  paymentDate DateTime? @default(dbgenerated("CURRENT_DATE")) @map("payment_date") @db.Date
+  createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("payments")
+}
+
+model Admin {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("admin")
+  isActive  Boolean?  @default(true) @map("is_active")
+  createdAt DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+
+  @@map("admins")
+}
+
+model WholesaleCustomer {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  mobile       String
+  address      String?
+  pricing      Json?     @default("{}") // e.g. { "Cow Milk": 50, "Buffalo Milk": 60 }
+  balance      Decimal   @default(0) @db.Decimal
+  isActive     Boolean?  @default(true) @map("is_active")
+  createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  entries      WholesaleDailyEntry[]
+
+  @@map("wholesale_customers")
+}
+
+model WholesaleDailyEntry {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entryDate           DateTime  @default(dbgenerated("CURRENT_DATE")) @map("entry_date") @db.Date
+  wholesaleCustomerId String?   @map("wholesale_customer_id") @db.Uuid
+  items               Json?     @default("[]") // e.g. [{ name: "Cow", qty: 10, rate: 50, amount: 500 }]
+  totalBill           Decimal   @default(0) @map("total_bill") @db.Decimal
+  amountPaid          Decimal   @default(0) @map("amount_paid") @db.Decimal
+  balanceForward      Decimal   @default(0) @map("balance_forward") @db.Decimal
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamp(6)
+  
+  customer            WholesaleCustomer? @relation(fields: [wholesaleCustomerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("wholesale_daily_entries")
+}
+
