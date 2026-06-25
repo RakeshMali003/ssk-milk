@@ -259,7 +259,7 @@ const Login: React.FC = () => {
                     },
                   }}
                 >
-                  {t('login.login_button')}
+                  Login
                 </Button>
               </Box>
             )}

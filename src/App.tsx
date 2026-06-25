@@ -13,7 +13,7 @@ import Billing from './pages/Billing';
 import WholesaleCustomers from './pages/WholesaleCustomers';
 import WholesaleDaily from './pages/WholesaleDaily';
 import CustomerPortal from './pages/CustomerPortal';
-import { Box, AppBar, Toolbar, IconButton, Typography, CssBaseline } from '@mui/material';
+import { Box, AppBar, Toolbar, IconButton, CssBaseline } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 // Route guard component
