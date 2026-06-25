@@ -175,7 +175,7 @@ const SalesReport: React.FC = () => {
 
       {/* Metric Widgets */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <Card
             sx={{
               background: '#ffffff',
@@ -200,7 +200,7 @@ const SalesReport: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <Card
             sx={{
               background: '#ffffff',
@@ -241,7 +241,7 @@ const SalesReport: React.FC = () => {
           {t('sales.filter')}
         </Typography>
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={3}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <TextField
               fullWidth
               label="Search Customer"
@@ -251,7 +251,7 @@ const SalesReport: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} sm={3}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <FormControl fullWidth>
               <InputLabel id="cust-filter-label">{t('sales.customer')}</InputLabel>
               <Select
@@ -270,7 +270,7 @@ const SalesReport: React.FC = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12} sm={3}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <FormControl fullWidth>
               <InputLabel id="timeframe-label">Timeframe</InputLabel>
               <Select
@@ -287,7 +287,7 @@ const SalesReport: React.FC = () => {
           </Grid>
 
           {timeframe !== 'yearly' && (
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <TextField
                 fullWidth
                 label="Year"
@@ -298,7 +298,7 @@ const SalesReport: React.FC = () => {
           )}
 
           {timeframe === 'daily' && (
-            <Grid item xs={12} sm={3}>
+            <Grid size={{ xs: 12, sm: 3 }}>
               <TextField
                 fullWidth
                 label="Month (MM)"
@@ -367,7 +367,7 @@ const SalesReport: React.FC = () => {
         count={filteredSales.length}
         rowsPerPage={rowsPerPage}
         page={page}
-        onPageChange={(e, newPage) => setPage(newPage)}
+        onPageChange={(_, newPage) => setPage(newPage)}
         onRowsPerPageChange={(e) => {
           setRowsPerPage(parseInt(e.target.value, 10));
           setPage(0);

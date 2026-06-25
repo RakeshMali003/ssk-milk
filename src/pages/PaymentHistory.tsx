@@ -17,7 +17,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
   Card,
   CardContent,
   MenuItem,
@@ -211,8 +210,8 @@ const PaymentHistory: React.FC = () => {
           boxShadow: '0 10px 30px rgba(0, 0, 0, 0.02)',
         }}
       >
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} sm={6}>
+        <Grid container spacing={3} sx={{ alignItems: 'center' }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
               label="Search Customer"
@@ -221,7 +220,7 @@ const PaymentHistory: React.FC = () => {
               onChange={(e) => setSearchText(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel id="status-filter-label">Filter Status</InputLabel>
               <Select
@@ -375,7 +374,7 @@ const PaymentHistory: React.FC = () => {
         count={filteredPayments.length}
         rowsPerPage={rowsPerPage}
         page={page}
-        onPageChange={(e, newPage) => setPage(newPage)}
+        onPageChange={(_, newPage) => setPage(newPage)}
         onRowsPerPageChange={(e) => {
           setRowsPerPage(parseInt(e.target.value, 10));
           setPage(0);
@@ -392,16 +391,18 @@ const PaymentHistory: React.FC = () => {
       <Dialog
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          sx: {
-            background: '#ffffff',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
-            borderRadius: 4,
-            width: '100%',
-            maxWidth: 450,
-            p: 2,
-            boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
-          },
+        slotProps={{
+          paper: {
+            sx: {
+              background: '#ffffff',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              borderRadius: 4,
+              width: '100%',
+              maxWidth: 450,
+              p: 2,
+              boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
+            }
+          }
         }}
       >
         <DialogTitle sx={{ color: 'text.primary', fontWeight: 800 }}>
@@ -441,7 +442,7 @@ const PaymentHistory: React.FC = () => {
             label={t('payments.date')}
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
 
           <FormControl fullWidth>

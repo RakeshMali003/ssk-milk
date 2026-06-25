@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useStore, type Customer, type WholesaleCustomer, type DailyInventory, type WholesaleDailyEntry } from '../context/StoreContext';
+import { useStore, type Customer, type WholesaleCustomer, type WholesaleDailyEntry } from '../context/StoreContext';
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Select, MenuItem, FormControl, InputLabel, Card, CardContent
@@ -57,7 +57,7 @@ const CustomerPortal: React.FC = () => {
   const totalPendingAmount = useMemo(() => {
     if (retailCustomer) {
       return payments
-        .filter(p => p.customerId === customer.id && (p.status === 'pending' || p.status === 'unpaid'))
+        .filter(p => p.customerId === customer?.id && (p.status === 'pending' || p.status === 'unpaid'))
         .reduce((acc, p) => acc + p.amount, 0);
     } else if (wholesaleCustomer) {
       return wholesaleCustomer.balance;

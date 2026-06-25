@@ -169,9 +169,13 @@ const NavBar: React.FC<NavBarProps> = ({ mobileOpen, handleDrawerToggle }) => {
                   <ListItemIcon>{item.icon}</ListItemIcon>
                   <ListItemText
                     primary={item.text}
-                    primaryTypographyProps={{
-                      fontSize: '0.95rem',
-                      fontWeight: isActive ? 700 : 500,
+                    slotProps={{
+                      primary: {
+                        sx: {
+                          fontSize: '0.95rem',
+                          fontWeight: isActive ? 700 : 500,
+                        }
+                      }
                     }}
                   />
                 </ListItemButton>
@@ -210,9 +214,13 @@ const NavBar: React.FC<NavBarProps> = ({ mobileOpen, handleDrawerToggle }) => {
           </ListItemIcon>
           <ListItemText
             primary={t('navbar.logout')}
-            primaryTypographyProps={{
-              fontSize: '0.95rem',
-              fontWeight: 600,
+            slotProps={{
+              primary: {
+                sx: {
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                }
+              }
             }}
           />
         </ListItemButton>

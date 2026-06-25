@@ -8,7 +8,6 @@ import {
   Grid,
   Paper,
   Typography,
-  Button,
   Card,
   CardContent,
   Avatar,
@@ -25,7 +24,7 @@ import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 
 const Dashboard: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { customers, milkList, dailyRecords, payments, wholesaleCustomers, wholesaleDaily } = useStore();
 
@@ -175,7 +174,7 @@ const Dashboard: React.FC = () => {
 
       {/* Stats Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <Card
             elevation={0}
             sx={{
@@ -204,7 +203,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <Card
             elevation={0}
             sx={{
@@ -233,7 +232,7 @@ const Dashboard: React.FC = () => {
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={4}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <Card
             elevation={0}
             sx={{
@@ -266,7 +265,7 @@ const Dashboard: React.FC = () => {
       {/* Advanced Chart Panels */}
       <Grid container spacing={4} sx={{ mb: 4 }}>
         {/* Sales Trend Line Chart */}
-        <Grid item xs={12} md={7}>
+        <Grid size={{ xs: 12, md: 7 }}>
           <Paper
             elevation={0}
             sx={{
@@ -355,7 +354,7 @@ const Dashboard: React.FC = () => {
         </Grid>
 
         {/* Milk Share Donut Chart */}
-        <Grid item xs={12} md={5}>
+        <Grid size={{ xs: 12, md: 5 }}>
           <Paper
             elevation={0}
             sx={{
@@ -412,7 +411,7 @@ const Dashboard: React.FC = () => {
                     textAlign: 'center',
                   }}
                 >
-                  <Typography variant="caption" display="block" sx={{ fontWeight: 800, color: 'text.secondary' }}>
+                  <Typography variant="caption" sx={{ display: 'block', fontWeight: 700, color: 'text.secondary', mb: 0.5 }}>
                     TOTAL
                   </Typography>
                   <Typography variant="subtitle2" sx={{ fontWeight: 900, color: 'text.primary', lineHeight: 1 }}>
@@ -445,7 +444,7 @@ const Dashboard: React.FC = () => {
       {/* Advanced Quick Actions Grid */}
       <Grid container spacing={4}>
         {/* Redesigned Quick Action Cards Grid */}
-        <Grid item xs={12} md={7}>
+        <Grid size={{ xs: 12, md: 7 }}>
           <Paper
             elevation={0}
             sx={{
@@ -463,7 +462,7 @@ const Dashboard: React.FC = () => {
 
             <Grid container spacing={2}>
               {/* Daily Sheet Card (Highlighted) */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Card
                   onClick={() => navigate('/daily')}
                   sx={{
@@ -499,7 +498,7 @@ const Dashboard: React.FC = () => {
               </Grid>
 
               {/* Add Customer Redesigned Card */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Card
                   onClick={() => navigate('/customers')}
                   sx={{
@@ -535,7 +534,7 @@ const Dashboard: React.FC = () => {
               </Grid>
 
               {/* Record Payment Card */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Card
                   onClick={() => navigate('/payments')}
                   sx={{
@@ -571,7 +570,7 @@ const Dashboard: React.FC = () => {
               </Grid>
 
               {/* Sales Statistics Card */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <Card
                   onClick={() => navigate('/sales')}
                   sx={{
@@ -610,7 +609,7 @@ const Dashboard: React.FC = () => {
         </Grid>
 
         {/* Notifications & Ledger Overview Column */}
-        <Grid item xs={12} md={5}>
+        <Grid size={{ xs: 12, md: 5 }}>
           <Paper
             elevation={0}
             sx={{

@@ -214,16 +214,18 @@ const MilkInventory: React.FC = () => {
       <Dialog
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          sx: {
-            background: '#ffffff',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
-            borderRadius: 4,
-            width: '100%',
-            maxWidth: 450,
-            p: 2,
-            boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
-          },
+        slotProps={{
+          paper: {
+            sx: {
+              background: '#ffffff',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              borderRadius: 4,
+              width: '100%',
+              maxWidth: 450,
+              p: 2,
+              boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
+            }
+          }
         }}
       >
         <DialogTitle sx={{ color: 'text.primary', fontWeight: 800 }}>

@@ -155,21 +155,21 @@ ${balanceText}
           label="Date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          InputLabelProps={{ shrink: true }}
+          slotProps={{ inputLabel: { shrink: true } }}
           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
         />
       </Box>
 
       <Grid container spacing={3}>
         {activeCustomers.length === 0 ? (
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Box sx={{ p: 4, textAlign: 'center', background: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
               <Typography color="text.secondary">No active wholesale customers found.</Typography>
             </Box>
           </Grid>
         ) : (
           activeCustomers.map((c) => (
-            <Grid item xs={12} sm={6} lg={4} key={c.id}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={c.id}>
               <Card sx={{ borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
                 <Box sx={{ p: 2.5, background: 'rgba(0,0,0,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
@@ -190,7 +190,7 @@ ${balanceText}
                   <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 2, letterSpacing: 0.5 }}>MILK QUANTITIES (Ltr)</Typography>
                   <Grid container spacing={2}>
                     {milkList.map(m => (
-                      <Grid item xs={6} key={m.id}>
+                      <Grid size={{ xs: 6 }} key={m.id}>
                         <TextField 
                           fullWidth
                           size="small" 
@@ -199,14 +199,14 @@ ${balanceText}
                           value={inputs[c.id]?.qtys[m.name] || ''} 
                           onChange={(e) => handleQtyChange(c.id, m.name, e.target.value)}
                           sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, bgcolor: '#f8fafc' } }}
-                          InputLabelProps={{ shrink: true }}
+                          slotProps={{ inputLabel: { shrink: true } }}
                         />
                       </Grid>
                     ))}
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <Divider sx={{ my: 1 }} />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField 
                         fullWidth
                         label="Amount Paid Today (₹)"
@@ -214,7 +214,7 @@ ${balanceText}
                         value={inputs[c.id]?.paid || ''} 
                         onChange={(e) => handlePaidChange(c.id, e.target.value)}
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{ inputLabel: { shrink: true } }}
                       />
                     </Grid>
                   </Grid>

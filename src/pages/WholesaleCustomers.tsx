@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useStore, type WholesaleCustomer } from '../context/StoreContext';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import {
-  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, TextField, Dialog, DialogContent, DialogActions, IconButton, InputAdornment, Divider, Switch, FormControlLabel, Chip, Grid, Select, MenuItem, FormControl, InputLabel, Card, CardContent
+  Box, Typography, Button, TextField, Dialog, DialogContent, DialogActions, InputAdornment, Divider, Switch, FormControlLabel, Chip, Grid, Card, CardContent, Select, MenuItem, FormControl
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import HistoryIcon from '@mui/icons-material/History';
@@ -162,14 +162,14 @@ const WholesaleCustomers: React.FC = () => {
 
       <Grid container spacing={3}>
         {wholesaleCustomers.length === 0 ? (
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
               <Typography sx={{ color: 'text.secondary' }}>No wholesale customers registered yet.</Typography>
             </Box>
           </Grid>
         ) : (
           wholesaleCustomers.map((c) => (
-            <Grid item xs={12} sm={6} md={4} key={c.id}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={c.id}>
               <Card sx={{ borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(0,0,0,0.05)', bgcolor: 'rgba(0,0,0,0.01)' }}>
                   <Box>
@@ -240,10 +240,12 @@ const WholesaleCustomers: React.FC = () => {
       <Dialog
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          sx: {
-            background: '#ffffff', borderRadius: 5, width: '100%', maxWidth: 600, overflow: 'hidden',
-          },
+        slotProps={{
+          paper: {
+            sx: {
+              background: '#ffffff', borderRadius: 5, width: '100%', maxWidth: 600, overflow: 'hidden',
+            }
+          }
         }}
       >
         <Box sx={{ background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)', px: 4, py: 3, color: '#fff' }}>
@@ -254,24 +256,24 @@ const WholesaleCustomers: React.FC = () => {
 
         <DialogContent sx={{ p: 4 }}>
           <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth label="Full Name" value={name} onChange={(e) => setName(e.target.value)}
-                error={errors.name} InputProps={{ startAdornment: <InputAdornment position="start"><PersonIcon color={errors.name ? "error" : "action"} /></InputAdornment> }}
+                error={errors.name} slotProps={{ input: { startAdornment: <InputAdornment position="start"><PersonIcon color={errors.name ? "error" : "action"} /></InputAdornment> } }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth label="Mobile Number" value={mobile} onChange={(e) => setMobile(e.target.value)}
-                error={errors.mobile} InputProps={{ startAdornment: <InputAdornment position="start"><PhoneIcon color={errors.mobile ? "error" : "action"} /></InputAdornment> }}
+                error={errors.mobile} slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneIcon color={errors.mobile ? "error" : "action"} /></InputAdornment> } }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth label="Delivery Address (Optional)" value={address} onChange={(e) => setAddress(e.target.value)}
-                InputProps={{ startAdornment: <InputAdornment position="start"><LocationOnIcon /></InputAdornment> }}
+                slotProps={{ input: { startAdornment: <InputAdornment position="start"><LocationOnIcon /></InputAdornment> } }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
@@ -284,7 +286,7 @@ const WholesaleCustomers: React.FC = () => {
 
           <Grid container spacing={2}>
             {milkList.map((m) => (
-              <Grid item xs={12} sm={6} key={m.id}>
+              <Grid size={{ xs: 12, sm: 6 }} key={m.id}>
                 <TextField
                   fullWidth 
                   label={`${m.name} Rate (₹/L)`} 
@@ -292,7 +294,7 @@ const WholesaleCustomers: React.FC = () => {
                   value={pricing[m.name] || ''} 
                   onChange={(e) => handlePricingChange(m.name, e.target.value)}
                   error={errors[`price_${m.name}`]} 
-                  InputProps={{ startAdornment: <InputAdornment position="start"><CurrencyRupeeIcon color={errors[`price_${m.name}`] ? "error" : "action"} /></InputAdornment> }}
+                  slotProps={{ input: { startAdornment: <InputAdornment position="start"><CurrencyRupeeIcon color={errors[`price_${m.name}`] ? "error" : "action"} /></InputAdornment> } }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
               </Grid>
@@ -324,8 +326,10 @@ const WholesaleCustomers: React.FC = () => {
         onClose={handleCloseHistory}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: { background: '#ffffff', borderRadius: 5, overflow: 'hidden' },
+        slotProps={{
+          paper: {
+            sx: { background: '#ffffff', borderRadius: 5, overflow: 'hidden' }
+          }
         }}
       >
         <Box sx={{ background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)', px: 4, py: 3, color: '#fff', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 2 }}>
@@ -360,7 +364,7 @@ const WholesaleCustomers: React.FC = () => {
           ) : (
             <Grid container spacing={2}>
               {historyData.map((row) => (
-                <Grid item xs={12} key={row.id}>
+                <Grid size={{ xs: 12 }} key={row.id}>
                   <Card sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
                     <Box sx={{ p: 2, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.05)', bgcolor: 'rgba(0,0,0,0.01)' }}>
                       <Typography sx={{ fontWeight: 800, color: 'text.primary' }}>
@@ -371,8 +375,8 @@ const WholesaleCustomers: React.FC = () => {
                       </Typography>
                     </Box>
                     <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                      <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} sm={6}>
+                      <Grid container spacing={2} sx={{ alignItems: 'center' }}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block', mb: 1 }}>ITEMS DELIVERED</Typography>
                           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                             {(Array.isArray(row.items) ? row.items : []).map((i: any, idx: number) => (
@@ -380,11 +384,11 @@ const WholesaleCustomers: React.FC = () => {
                             ))}
                           </Box>
                         </Grid>
-                        <Grid item xs={6} sm={3}>
+                        <Grid size={{ xs: 6, sm: 3 }}>
                           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>TODAY'S BILL</Typography>
                           <Typography variant="body1" sx={{ fontWeight: 800, color: 'error.main' }}>+ ₹{row.totalBill}</Typography>
                         </Grid>
-                        <Grid item xs={6} sm={3}>
+                        <Grid size={{ xs: 6, sm: 3 }}>
                           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>AMOUNT PAID</Typography>
                           <Typography variant="body1" sx={{ fontWeight: 800, color: 'success.main' }}>- ₹{row.amountPaid}</Typography>
                         </Grid>

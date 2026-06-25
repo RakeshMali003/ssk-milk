@@ -85,7 +85,7 @@ const DailyInventory: React.FC = () => {
             label={t('daily.date')}
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 3,

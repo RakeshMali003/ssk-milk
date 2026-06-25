@@ -175,7 +175,7 @@ const Login: React.FC = () => {
 
             <Tabs 
               value={tabIndex} 
-              onChange={(e, val) => { setTabIndex(val); setError(''); }} 
+              onChange={(_, val) => { setTabIndex(val); setError(''); }} 
               variant="fullWidth" 
               sx={{ mb: 3 }}
             >
@@ -190,14 +190,14 @@ const Login: React.FC = () => {
             )}
 
             {tabIndex === 0 && (
-              <form onSubmit={handleAdminLogin}>
+              <Box component="form" onSubmit={handleAdminLogin} sx={{ mt: 1 }}>
                 <TextField
                   fullWidth
                   label={t('login.email')}
                   variant="outlined"
                   margin="normal"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(_) => setEmail(_.target.value)}
                   sx={{
                     mb: 2,
                     '& .MuiOutlinedInput-root': {
@@ -242,7 +242,7 @@ const Login: React.FC = () => {
                 >
                   {t('login.login_button')}
                 </Button>
-              </form>
+              </Box>
             )}
 
             {tabIndex === 1 && (
@@ -261,8 +261,10 @@ const Login: React.FC = () => {
                       borderRadius: 2,
                     },
                   }}
-                  InputProps={{
-                    startAdornment: <PhoneAndroidIcon sx={{ color: 'action.active', mr: 1 }} />
+                  slotProps={{
+                    input: {
+                      startAdornment: <PhoneAndroidIcon sx={{ color: 'action.active', mr: 1 }} />
+                    }
                   }}
                 />
                 <Button

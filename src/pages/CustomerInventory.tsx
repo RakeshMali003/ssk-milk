@@ -14,7 +14,6 @@ import {
   Button,
   TextField,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   IconButton,
@@ -242,7 +241,7 @@ const CustomerInventory: React.FC = () => {
                   <TableCell sx={{ color: 'text.primary', fontWeight: 600 }}>
                     {c.name}
                     {c.email && (
-                      <Typography variant="caption" display="block" sx={{ color: 'text.secondary' }}>
+                      <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
                         {c.email}
                       </Typography>
                     )}
@@ -280,16 +279,18 @@ const CustomerInventory: React.FC = () => {
       <Dialog
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          sx: {
-            background: '#ffffff',
-            border: 'none',
-            borderRadius: 5,
-            width: '100%',
-            maxWidth: 550,
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-          },
+        slotProps={{
+          paper: {
+            sx: {
+              background: '#ffffff',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              borderRadius: 4,
+              width: '100%',
+              maxWidth: 450,
+              overflow: 'hidden',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
+            }
+          }
         }}
       >
         {/* Header decoration */}
@@ -322,13 +323,15 @@ const CustomerInventory: React.FC = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             error={errors.name}
-            helperText={errors.name ? 'Name is required' : ''}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
+            helperText={errors.name ? t('customer.name_required') : ''}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ color: 'rgba(0,0,0,0.4)' }} />
+                  </InputAdornment>
+                ),
+              }
             }}
           />
           <TextField
@@ -337,13 +340,15 @@ const CustomerInventory: React.FC = () => {
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
             error={errors.mobile}
-            helperText={errors.mobile ? 'Mobile is required' : ''}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PhoneIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
+            helperText={errors.mobile ? t('customer.mobile_required') : ''}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon sx={{ color: 'rgba(0,0,0,0.4)' }} />
+                  </InputAdornment>
+                ),
+              }
             }}
           />
           <TextField
@@ -351,12 +356,14 @@ const CustomerInventory: React.FC = () => {
             label={t('customer.email') + ' (Optional)'}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <MailIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MailIcon sx={{ color: 'rgba(0,0,0,0.4)' }} />
+                  </InputAdornment>
+                ),
+              }
             }}
           />
           <TextField
@@ -367,13 +374,15 @@ const CustomerInventory: React.FC = () => {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             error={errors.address}
-            helperText={errors.address ? 'Address is required' : ''}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1.5 }}>
-                  <LocationOnIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
+            helperText={errors.address ? t('customer.address_required') : ''}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start" sx={{ mt: -2 }}>
+                    <LocationOnIcon sx={{ color: 'rgba(0,0,0,0.4)' }} />
+                  </InputAdornment>
+                ),
+              }
             }}
           />
 
@@ -413,13 +422,15 @@ const CustomerInventory: React.FC = () => {
             value={dailyQty}
             onChange={(e) => setDailyQty(e.target.value)}
             error={errors.dailyQty}
-            helperText={errors.dailyQty ? 'Valid quantity is required' : ''}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <ShoppingCartIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
+            helperText={errors.dailyQty ? t('customer.qty_required') : ''}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <ShoppingCartIcon sx={{ color: 'rgba(0,0,0,0.4)' }} />
+                  </InputAdornment>
+                ),
+              }
             }}
           />
 

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
+
 import { useStore, type Customer } from '../context/StoreContext';
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import {
@@ -18,8 +18,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Card,
-  CardContent,
   IconButton,
   Divider,
 } from '@mui/material';
@@ -29,11 +27,9 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 
 const Billing: React.FC = () => {
-  const { t } = useTranslation();
   const { customers, milkList, dailyRecords, payments, clearTable } = useStore();
 
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
@@ -306,7 +302,7 @@ Please share a screenshot of the payment.
             label="Select Month"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            InputLabelProps={{ shrink: true }}
+            slotProps={{ inputLabel: { shrink: true } }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 3,
@@ -372,8 +368,14 @@ Please share a screenshot of the payment.
         onClose={handleClose}
         maxWidth="md"
         fullWidth
-        PaperProps={{
-          sx: { borderRadius: 4 }
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 4,
+              width: '100%',
+              m: { xs: 1, sm: 2 },
+            }
+          }
         }}
       >
         {selectedCustomer && (

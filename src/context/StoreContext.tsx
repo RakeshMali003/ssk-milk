@@ -208,6 +208,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             if (p.status === 'paid') reactStatus = 'completed';
             else if (p.status === 'pending') reactStatus = 'unpaid';
             
+            const methodValid: 'cash' | 'upi' = p.mode === 'upi' ? 'upi' : 'cash';
+
             return {
               id: p.id,
               customerId: p.customer_id,
@@ -215,7 +217,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               amount: Number(p.amount),
               date: p.payment_date,
               status: reactStatus,
-              method: p.mode === 'upi' ? 'upi' : 'cash',
+              method: methodValid,
               notes: p.note || '',
             };
           });
@@ -557,6 +559,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .select();
         if (error) throw error;
         if (data && data[0]) {
+          const methodValid: 'cash' | 'upi' = data[0].mode === 'upi' ? 'upi' : 'cash';
           const newPay: Payment = {
             id: data[0].id,
             customerId: data[0].customer_id,
@@ -564,7 +567,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             amount: Number(data[0].amount),
             date: data[0].payment_date,
             status: pay.status,
-            method: data[0].mode === 'upi' ? 'upi' : 'cash',
+            method: methodValid,
             notes: data[0].note || '',
           };
           setPayments((prev) => [newPay, ...prev]);
