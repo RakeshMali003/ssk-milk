@@ -79,9 +79,9 @@ function App() {
                 >
                   <MenuIcon />
                 </IconButton>
-                <Typography variant="h6" noWrap component="div">
-                  Shree Sai Krupa
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <img src="/logo.png" alt="Logo" style={{ height: 40, objectFit: 'contain' }} />
+                </Box>
               </Toolbar>
             </AppBar>
             <NavBar mobileOpen={mobileOpen} handleDrawerToggle={handleDrawerToggle} />

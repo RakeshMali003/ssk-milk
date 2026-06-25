@@ -310,8 +310,7 @@ const Login: React.FC = () => {
                 </Button>
               </form>
             )}
-
-
+          </CardContent>
         </Card>
       </Fade>
     </Box>
