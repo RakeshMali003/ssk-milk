@@ -11,7 +11,6 @@ import {
   Typography,
   Divider,
   Box,
-  Avatar,
   IconButton
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
