@@ -526,7 +526,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         // 2. Insert new ones
         const insertRows = deliveries.map((d) => {
-          const cust = customers.find((c) => c.id === d.customerId);
           const milkItem = milkList.find((m) => m.name === d.milkName);
           return {
             delivery_date: dateStr,

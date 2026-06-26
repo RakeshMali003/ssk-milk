@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore, type Payment } from '../context/StoreContext';
-import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+
 import {
   Box,
   Typography,
@@ -34,11 +34,10 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircle';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const PaymentHistory: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { payments, customers, addPayment, updatePaymentStatus, dailyRecords, milkList } = useStore();
+  const { payments, customers, addPayment, updatePaymentStatus } = useStore();
   const [open, setOpen] = useState(false);
 
   // Filter and pagination states
