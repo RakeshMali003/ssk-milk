@@ -448,7 +448,7 @@ const Dashboard: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              p: { xs: 1.5, md: 3 },
               height: '100%',
               background: '#ffffff',
               border: '1px solid rgba(0, 0, 0, 0.06)',
@@ -460,7 +460,7 @@ const Dashboard: React.FC = () => {
               ⚡ Premium Actions Control Center
             </Typography>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={{ xs: 1, sm: 2 }}>
               {/* Daily Sheet Card (Highlighted) */}
               <Grid size={{ xs: 6 }}>
                 <Card

@@ -311,17 +311,18 @@ const SalesReport: React.FC = () => {
         </Grid>
       </Paper>
 
-      {/* Sales Report Table */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          background: '#ffffff',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          borderRadius: 4,
-          overflowX: 'auto',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-        }}
-      >
+      {/* Desktop Table */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            borderRadius: 4,
+            overflowX: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          }}
+        >
         <Table>
           <TableHead sx={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}>
             <TableRow>
@@ -361,6 +362,47 @@ const SalesReport: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
+
+      {/* Mobile Cards */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+        {filteredSales.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography sx={{ color: 'text.secondary' }}>No sales found matching search parameters.</Typography>
+          </Box>
+        ) : (
+          paginatedSales.map((item, index) => (
+            <Card key={index} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>{item.customerName}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{item.date}</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography sx={{ color: '#2e7d32', fontWeight: 800 }}>₹{item.amount.toFixed(2)}</Typography>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.02)', p: 1, borderRadius: 2 }}>
+                  <Box>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>PRODUCT</Typography>
+                    <Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.85rem' }}>{item.milkName}</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>QTY</Typography>
+                    <Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.85rem' }}>{item.qty}</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>RATE</Typography>
+                    <Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.85rem' }}>₹{item.price.toFixed(2)}</Typography>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
 
       <TablePagination
         rowsPerPageOptions={[10, 25, 50, 100]}

@@ -198,16 +198,18 @@ const CustomerInventory: React.FC = () => {
         </CardContent>
       </Card>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          background: '#ffffff',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          borderRadius: 4,
-          overflowX: 'auto',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-        }}
-      >
+      {/* Desktop Table */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            borderRadius: 4,
+            overflowX: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          }}
+        >
         <Table>
           <TableHead sx={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}>
             <TableRow>
@@ -274,6 +276,57 @@ const CustomerInventory: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
+
+      {/* Mobile Cards */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+        {customers.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography sx={{ color: 'text.secondary' }}>No customers registered yet. Click 'Add Customer' to start.</Typography>
+          </Box>
+        ) : (
+          customers.map((c) => (
+            <Card key={c.id} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>{c.name}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{c.mobile}</Typography>
+                  </Box>
+                  <Chip 
+                    label={c.isActive ? 'Active' : 'Inactive'} 
+                    size="small" 
+                    color={c.isActive ? 'success' : 'default'} 
+                    sx={{ fontWeight: 600, height: 20, fontSize: '0.65rem' }}
+                  />
+                </Box>
+                <Box sx={{ mb: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>{c.address}</Typography>
+                  {c.email && <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>{c.email}</Typography>}
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.02)', p: 1, borderRadius: 2, mb: 1.5 }}>
+                  <Box>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>MILK PREF</Typography>
+                    <Typography sx={{ color: '#0072FF', fontWeight: 700, fontSize: '0.85rem' }}>{c.milkName}</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>DAILY QTY</Typography>
+                    <Typography sx={{ color: 'text.primary', fontWeight: 800, fontSize: '0.85rem' }}>{c.dailyQty} Pcs/Ltr</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(0,0,0,0.04)', pt: 1 }}>
+                  <IconButton onClick={() => handleOpen(c)} sx={{ color: '#0072FF', mr: 1, bgcolor: 'rgba(0,114,255,0.05)', width: 32, height: 32 }}>
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton onClick={() => handleDelete(c.id)} sx={{ color: '#ff4d4d', bgcolor: 'rgba(255,77,77,0.05)', width: 32, height: 32 }}>
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
 
       {/* Customer Form Dialog */}
       <Dialog

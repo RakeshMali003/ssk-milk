@@ -274,6 +274,7 @@ const CustomerPortal: React.FC = () => {
         </Button>
       </Box>
 
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
       <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
         <Table>
           <TableHead sx={{ background: 'rgba(0,0,0,0.02)' }}>
@@ -309,6 +310,33 @@ const CustomerPortal: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
+
+      {/* Mobile Cards */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5 }}>
+        {monthlyData.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography sx={{ color: 'text.secondary' }}>No deliveries found for this month.</Typography>
+          </Box>
+        ) : (
+          (monthlyData as any[]).map((row, idx) => (
+            <Card key={idx} variant="outlined" sx={{ borderRadius: 3 }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{format(parseISO(row.date), 'dd MMM yyyy')}</Typography>
+                  {wholesaleCustomer && <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#2ecc71' }}>₹{row.totalBill}</Typography>}
+                </Box>
+                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                  {retailCustomer 
+                    ? `${row.qty} Ltr` 
+                    : row.items.map((i: any) => `${i.qty}L ${i.milkName}`).join(', ')
+                  }
+                </Typography>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
     </Box>
   );
 };

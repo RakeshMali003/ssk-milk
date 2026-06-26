@@ -79,7 +79,7 @@ const DailyInventory: React.FC = () => {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', width: { xs: '100%', sm: 'auto' } }}>
           <TextField
             type="date"
             label={t('daily.date')}
@@ -88,7 +88,7 @@ const DailyInventory: React.FC = () => {
             onChange={(e) => setDate(e.target.value)}
             slotProps={{ inputLabel: { shrink: true } }}
             sx={{
-              width: 140,
+              flex: 1,
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
               },
@@ -100,12 +100,15 @@ const DailyInventory: React.FC = () => {
             onClick={handleSave}
             size="small"
             sx={{
+              flex: 1,
               borderRadius: 2,
-              px: 2,
-              py: 1,
+              px: 1,
+              py: 1.1,
               background: 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
               fontWeight: 700,
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
               boxShadow: '0 4px 15px rgba(46, 204, 113, 0.2)',
+              whiteSpace: 'nowrap'
             }}
           >
             {t('daily.save_all')}
@@ -131,16 +134,18 @@ const DailyInventory: React.FC = () => {
         </CardContent>
       </Card>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          background: '#ffffff',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          borderRadius: 4,
-          overflowX: 'auto',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-        }}
-      >
+      {/* Desktop Table */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            borderRadius: 4,
+            overflowX: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          }}
+        >
         <Table>
           <TableHead sx={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}>
             <TableRow>
@@ -176,7 +181,7 @@ const DailyInventory: React.FC = () => {
                       value={d.qty}
                       onChange={(e) => handleQtyChange(index, e.target.value)}
                       sx={{
-                        width: 90,
+                        width: { xs: 70, sm: 90 },
                         '& .MuiOutlinedInput-root': {
                           borderRadius: 2,
                           backgroundColor: 'rgba(255, 255, 255, 0.6)',
@@ -217,6 +222,71 @@ const DailyInventory: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
+
+      {/* Mobile Cards */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+        {deliveries.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography sx={{ color: 'text.secondary' }}>No customer delivery data available.</Typography>
+          </Box>
+        ) : (
+          deliveries.map((d, index) => (
+            <Card key={d.customerId} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', backgroundColor: d.delivered ? '#ffffff' : 'rgba(231, 76, 60, 0.02)' }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>{d.customerName}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{d.milkName}</Typography>
+                  </Box>
+                  <TextField
+                    size="small"
+                    type="number"
+                    value={d.qty}
+                    onChange={(e) => handleQtyChange(index, e.target.value)}
+                    sx={{
+                      width: 80,
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                      },
+                    }}
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(0,0,0,0.04)', pt: 1.5 }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>STATUS</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 700,
+                        color: d.delivered ? '#2ecc71' : '#ff4d4d',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 1.5,
+                        bgcolor: d.delivered ? 'rgba(46, 204, 113, 0.08)' : 'rgba(231, 76, 60, 0.08)',
+                      }}
+                    >
+                      {d.delivered ? t('daily.delivered') : t('daily.not_delivered')}
+                    </Typography>
+                    <Checkbox
+                      checked={d.delivered}
+                      onChange={(e) => handleCheckboxChange(index, e.target.checked)}
+                      sx={{
+                        color: '#0072FF',
+                        p: 0,
+                        '&.Mui-checked': {
+                          color: '#2ecc71',
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
 
       {/* Snackbar notification */}
       <Snackbar

@@ -67,8 +67,11 @@ const NavBar: React.FC<NavBarProps> = ({ mobileOpen, handleDrawerToggle }) => {
       <Box>
         {/* Header Branding */}
         <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mb: 1 }}>
-            <img src="/logo.png" alt="Logo" style={{ height: 60, objectFit: 'contain' }} />
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 1, gap: 1 }}>
+            <MilkIcon sx={{ color: '#0072FF', fontSize: 36 }} />
+            <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.primary', letterSpacing: 1 }}>
+              SSK<span style={{ color: '#0072FF' }}>DAIRY</span>
+            </Typography>
           </Box>
 
           {/* Database connection status indicator */}

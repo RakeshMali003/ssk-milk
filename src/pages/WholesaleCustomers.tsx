@@ -150,14 +150,15 @@ const WholesaleCustomers: React.FC = () => {
           size="small"
           sx={{
             borderRadius: 2,
-            px: 2,
-            py: 1,
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 0.8, sm: 1 },
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
             background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
             fontWeight: 700,
             boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
           }}
         >
-          Add Wholesale Buyer
+          Add Buyer
         </Button>
       </Box>
 
@@ -314,10 +315,12 @@ const WholesaleCustomers: React.FC = () => {
             />
           </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 4, pb: 4, pt: 1 }}>
-          <Button onClick={handleClose} sx={{ color: 'text.secondary', fontWeight: 600, mr: 1, textTransform: 'none', fontSize: '1rem' }}>Cancel</Button>
-          <Button onClick={handleSave} variant="contained" sx={{ borderRadius: 2, px: 5, py: 1.2, background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)', fontWeight: 700, textTransform: 'none', fontSize: '1rem', boxShadow: '0 4px 15px rgba(0, 114, 255, 0.3)' }}>
-            {editingItem ? 'Update Details' : 'Create Account'}
+        <DialogActions sx={{ px: { xs: 2, sm: 4 }, pb: { xs: 2, sm: 4 }, pt: 1, display: 'flex', gap: 1 }}>
+          <Button onClick={handleClose} size="small" sx={{ flex: 1, color: 'text.secondary', fontWeight: 600, textTransform: 'none', fontSize: { xs: '0.75rem', sm: '0.875rem' }, py: { xs: 0.6, sm: 1 } }}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} size="small" variant="contained" sx={{ flex: 1, borderRadius: 2, py: { xs: 0.6, sm: 1 }, background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)', fontWeight: 700, textTransform: 'none', fontSize: { xs: '0.75rem', sm: '0.875rem' }, boxShadow: '0 4px 15px rgba(0, 114, 255, 0.3)' }}>
+            {editingItem ? 'Update' : 'Create Account'}
           </Button>
         </DialogActions>
       </Dialog>

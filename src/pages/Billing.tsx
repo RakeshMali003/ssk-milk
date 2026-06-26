@@ -20,6 +20,8 @@ import {
   DialogActions,
   IconButton,
   Divider,
+  Card,
+  CardContent,
 } from '@mui/material';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -312,16 +314,18 @@ Please share a screenshot of the payment.
         </Box>
       </Box>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          background: '#ffffff',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          borderRadius: 4,
-          overflowX: 'auto',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-        }}
-      >
+      {/* Desktop Table */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            borderRadius: 4,
+            overflowX: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          }}
+        >
         <Table>
           <TableHead sx={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}>
             <TableRow>
@@ -361,6 +365,47 @@ Please share a screenshot of the payment.
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
+
+      {/* Mobile Cards */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+        {customerBills.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography sx={{ color: 'text.secondary' }}>No billing data available.</Typography>
+          </Box>
+        ) : (
+          customerBills.map((bill, index) => (
+            <Card key={index} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>{bill.customer.name}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{bill.customer.mobile}</Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography sx={{ color: '#2ecc71', fontWeight: 800 }}>₹{bill.totalAmount}</Typography>
+                  </Box>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.02)', p: 1, borderRadius: 2, mb: 1.5 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700 }}>TOTAL QTY</Typography>
+                  <Typography sx={{ color: 'text.primary', fontWeight: 800 }}>{bill.totalQty}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(0,0,0,0.04)', pt: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<ReceiptLongIcon />}
+                    onClick={() => handleOpenDetails(bill)}
+                    sx={{ borderRadius: 2, textTransform: 'none', py: 0.5 }}
+                  >
+                    View Bill
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
 
       {/* Bill Details Dialog */}
       <Dialog
@@ -395,7 +440,8 @@ Please share a screenshot of the payment.
             </DialogTitle>
             <Divider />
             <DialogContent sx={{ p: 3 }}>
-              <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 3 }}>
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, mb: 3 }}>
                 <Table size="small">
                   <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
                     <TableRow>
@@ -426,6 +472,30 @@ Please share a screenshot of the payment.
                   </TableBody>
                 </Table>
               </TableContainer>
+              </Box>
+
+              <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5, mb: 3 }}>
+                {(selectedCustomer as any).dailyEntries.length === 0 ? (
+                  <Box sx={{ p: 3, textAlign: 'center', bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 2 }}>
+                    <Typography sx={{ color: 'text.secondary' }}>No deliveries recorded for this month.</Typography>
+                  </Box>
+                ) : (
+                  (selectedCustomer as any).dailyEntries.map((entry: any, i: number) => (
+                    <Card key={i} variant="outlined" sx={{ borderRadius: 2 }}>
+                      <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{format(parseISO(entry.date), 'dd MMM')}</Typography>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#2ecc71' }}>₹{entry.amount}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{entry.milkName}</Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>{entry.qty} x ₹{entry.price}</Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', p: 2, bgcolor: '#f1f5f9', borderRadius: 2 }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.secondary', mr: 2 }}>

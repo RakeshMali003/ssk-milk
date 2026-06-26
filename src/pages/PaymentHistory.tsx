@@ -240,16 +240,18 @@ const PaymentHistory: React.FC = () => {
         </Grid>
       </Paper>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          background: '#ffffff',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          borderRadius: 4,
-          overflowX: 'auto',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-        }}
-      >
+      {/* Desktop Table */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            borderRadius: 4,
+            overflowX: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          }}
+        >
         <Table>
           <TableHead sx={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}>
             <TableRow>
@@ -368,6 +370,89 @@ const PaymentHistory: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
+
+      {/* Mobile Cards */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+        {filteredPayments.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography sx={{ color: 'text.secondary' }}>No payment ledger transactions logged yet.</Typography>
+          </Box>
+        ) : (
+          paginatedPayments.map((p) => (
+            <Card key={p.id} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>{p.customerName}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>{p.date}</Typography>
+                  </Box>
+                  <Typography sx={{ color: 'text.primary', fontWeight: 800 }}>₹{p.amount.toFixed(2)}</Typography>
+                </Box>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.02)', p: 1, borderRadius: 2, mb: 1.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+                    {p.method === 'upi' ? (
+                      <AccountBalanceWalletIcon sx={{ fontSize: 18, color: '#0072FF' }} />
+                    ) : (
+                      <PaymentsIcon sx={{ fontSize: 18, color: '#2e7d32' }} />
+                    )}
+                    <Typography variant="caption" sx={{ fontWeight: 700 }}>
+                      {p.method === 'upi' ? t('payments.upi') : t('payments.cash')}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 850,
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: 1.5,
+                      color: p.status === 'completed' ? '#2e7d32' : p.status === 'pending' ? '#b78103' : '#c62828',
+                      bgcolor: p.status === 'completed' ? 'rgba(46, 204, 113, 0.08)' : p.status === 'pending' ? 'rgba(241, 196, 15, 0.08)' : 'rgba(231, 76, 60, 0.08)',
+                    }}
+                  >
+                    {p.status === 'completed' ? t('payments.completed') : p.status === 'pending' ? t('payments.pending') : t('payments.unpaid')}
+                  </Typography>
+                </Box>
+                
+                {p.notes && (
+                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 1.5, fontStyle: 'italic' }}>
+                    Notes: {p.notes}
+                  </Typography>
+                )}
+
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(0,0,0,0.04)', pt: 1, gap: 1 }}>
+                  {(p.status === 'pending' || p.status === 'unpaid') && (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="success"
+                      onClick={() => handleWhatsAppReminder(p)}
+                      sx={{ borderRadius: 2, textTransform: 'none', px: 1, minWidth: 0 }}
+                    >
+                      <WhatsAppIcon fontSize="small" />
+                    </Button>
+                  )}
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => toggleStatus(p)}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      color: p.status === 'completed' ? 'text.secondary' : '#2e7d32',
+                      borderColor: p.status === 'completed' ? 'rgba(0,0,0,0.1)' : '#2e7d32',
+                    }}
+                  >
+                    {p.status === 'completed' ? 'Mark Pending' : 'Mark Paid'}
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
 
       <TablePagination
         rowsPerPageOptions={[10, 25, 50, 100]}

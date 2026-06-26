@@ -17,3 +17,23 @@ body {
   min-height: 100vh;
   width: 100%;
 }
+
+/* Global component styling */
+.MuiCard-root, .MuiPaper-root {
+  border-radius: 15px !important;
+}
+
+.MuiDrawer-paper, .MuiAppBar-root {
+  border-radius: 0 !important;
+}
+
+/* Mobile specific styling adjustments */
+@media (max-width: 600px) {
+  .MuiCard-root, .MuiPaper-root {
+    border-radius: 10px !important;
+  }
+  .MuiTableCell-root {
+    padding: 8px !important;
+    white-space: nowrap;
+  }
+}

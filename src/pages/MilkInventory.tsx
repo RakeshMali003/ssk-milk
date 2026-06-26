@@ -111,13 +111,13 @@ const MilkInventory: React.FC = () => {
             {t('milk.subtitle')}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 2, width: { xs: '100%', sm: 'auto' } }}>
           <Button
             variant="outlined"
             startIcon={<DeleteSweepIcon />}
             onClick={handleClearAll}
             color="error"
-            sx={{ borderRadius: 3, px: 3, py: 1.5, fontWeight: 700 }}
+            sx={{ flex: { xs: 1, sm: 'none' }, borderRadius: '10px', px: { xs: 1, sm: 3 }, py: { xs: 1.5, sm: 1.5 }, fontWeight: 700, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
           >
             Clear All
           </Button>
@@ -126,11 +126,13 @@ const MilkInventory: React.FC = () => {
             startIcon={<AddIcon />}
             onClick={() => handleOpen()}
             sx={{
-              borderRadius: 3,
-              px: 3,
-              py: 1.5,
+              flex: { xs: 1, sm: 'none' },
+              borderRadius: '10px',
+              px: { xs: 1, sm: 3 },
+              py: { xs: 1.5, sm: 1.5 },
               background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
               fontWeight: 700,
+              fontSize: { xs: '0.8rem', sm: '0.875rem' },
               boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
             }}
           >
@@ -157,16 +159,18 @@ const MilkInventory: React.FC = () => {
         </CardContent>
       </Card>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          background: '#ffffff',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          borderRadius: 4,
-          overflowX: 'auto',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
-        }}
-      >
+      {/* Desktop Table */}
+      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+        <TableContainer
+          component={Paper}
+          sx={{
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.06)',
+            borderRadius: 4,
+            overflowX: 'auto',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+          }}
+        >
         <Table>
           <TableHead sx={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}>
             <TableRow>
@@ -209,6 +213,37 @@ const MilkInventory: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      </Box>
+
+      {/* Mobile Cards */}
+      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
+        {milkList.length === 0 ? (
+          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography sx={{ color: 'text.secondary' }}>No milk variants added yet. Click 'Add Milk Type' to add.</Typography>
+          </Box>
+        ) : (
+          milkList.map((item) => (
+            <Card key={item.id} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2, mb: 0.5 }}>{item.name}</Typography>
+                    <Typography sx={{ color: '#0072FF', fontWeight: 700 }}>₹{item.price.toFixed(2)}</Typography>
+                  </Box>
+                  <Box>
+                    <IconButton onClick={() => handleOpen(item)} sx={{ color: '#0072FF', mr: 1, bgcolor: 'rgba(0,114,255,0.05)' }}>
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton onClick={() => handleDelete(item.id)} sx={{ color: '#ff4d4d', bgcolor: 'rgba(255,77,77,0.05)' }}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Box>
 
       {/* Add / Edit Dialog */}
       <Dialog
