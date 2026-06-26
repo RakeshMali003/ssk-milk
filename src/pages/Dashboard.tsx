@@ -42,7 +42,7 @@ const Dashboard: React.FC = () => {
       customer.subscriptions?.forEach(sub => {
         const milk = milkList.find((m) => m.name === sub.milkName);
         const price = milk ? milk.price : 0;
-        dailyTotal += sub.defaultQty * price;
+        dailyTotal += Number((sub.defaultQty * price).toFixed(2));
       });
       return acc + dailyTotal;
     }, 0);
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
           if (d.delivered) {
             const milk = milkList.find((m) => m.name === d.milkName);
             const price = milk ? milk.price : 0;
-            revenue += d.qty * price;
+            revenue += Number((d.qty * price).toFixed(2));
           }
         });
       } else {

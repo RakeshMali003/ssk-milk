@@ -57,12 +57,12 @@ const WholesaleDaily: React.FC = () => {
           if (q > 0) {
             qty += q;
             const rate = c.pricing[m.name] || m.price;
-            amount += (q * rate);
+            amount += Number((q * rate).toFixed(2));
           }
         });
       }
     });
-    return { todayTotalQty: qty, todayTotalAmount: amount };
+    return { todayTotalQty: qty, todayTotalAmount: Number(amount.toFixed(2)) };
   }, [inputs, activeCustomers, milkList]);
 
   const handleQtyChange = (id: string, milkName: string, val: string) => {
@@ -104,7 +104,7 @@ const WholesaleDaily: React.FC = () => {
       if (q > 0) {
         hasAnyQty = true;
         const rate = customer.pricing[m.name] || m.price; // fallback to retail if not set
-        const amount = q * rate;
+        const amount = Number((q * rate).toFixed(2));
         totalBill += amount;
         items.push({ milkName: m.name, qty: q, rate, amount });
       }
@@ -275,7 +275,7 @@ ${balanceText}
                                 }
                               });
                             }
-                            return amount;
+                            return Number(amount.toFixed(2));
                           })()
                         }
                       </Typography>

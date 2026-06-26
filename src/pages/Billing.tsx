@@ -78,7 +78,7 @@ const Billing: React.FC = () => {
           });
         }
       });
-      return { customerId: customer.id, customerName: customer.name, amount: totalAmount };
+      return { customerId: customer.id, customerName: customer.name, amount: Number(totalAmount.toFixed(2)) };
     }).filter(b => b.amount > 0);
   }, [generateBillsOpen, generateMonth, customers, dailyRecords, milkList]);
 
@@ -122,7 +122,7 @@ const Billing: React.FC = () => {
             if (custRecord.delivered) {
               const milkItem = milkList.find(m => m.name === custRecord.milkName);
               const price = milkItem ? milkItem.price : 0;
-              const amount = custRecord.qty * price;
+              const amount = Number((custRecord.qty * price).toFixed(2));
 
               totalAmount += amount;
               totalQty += custRecord.qty;
@@ -145,8 +145,8 @@ const Billing: React.FC = () => {
 
       return {
         customer,
-        totalAmount,
-        totalQty,
+        totalAmount: Number(totalAmount.toFixed(2)),
+        totalQty: Number(totalQty.toFixed(2)),
         dailyEntries,
         custPayments,
       };

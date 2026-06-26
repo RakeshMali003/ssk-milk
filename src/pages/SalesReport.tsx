@@ -71,7 +71,7 @@ const SalesReport: React.FC = () => {
             milkName: del.milkName,
             qty: del.qty,
             price: price,
-            amount: del.qty * price,
+            amount: Number((del.qty * price).toFixed(2)),
           });
         }
       });
