@@ -7,14 +7,18 @@ export interface MilkItem {
   price: number;
 }
 
+export interface MilkSubscription {
+  milkName: string;
+  defaultQty: number;
+}
+
 export interface Customer {
   id: string;
   name: string;
   email: string;
   mobile: string;
   address: string;
-  milkName: string;
-  dailyQty: number;
+  subscriptions: MilkSubscription[];
   isActive: boolean;
 }
 
@@ -104,11 +108,11 @@ const initialMilk: MilkItem[] = [
 ];
 
 const initialCustomers: Customer[] = [
-  { id: 'c1', name: 'Ramesh Sharma', email: 'ramesh@gmail.com', mobile: '9876543210', address: 'Plot 42, Sector 5, Vashi', milkName: 'Cow Milk (Full Cream)', dailyQty: 2, isActive: true },
-  { id: 'c2', name: 'Sanjay Patel', email: 'sanjay.p@gmail.com', mobile: '9822334455', address: 'B-201, Green Heights, Koparkhairane', milkName: 'Buffalo Milk', dailyQty: 1.5, isActive: true },
-  { id: 'c3', name: 'Sunita Deshmukh', email: 'sunita.d@gmail.com', mobile: '9123456789', address: 'Row House 3, Sector 12, Sanpada', milkName: 'Taaza Milk (Pouch)', dailyQty: 3, isActive: true },
-  { id: 'c4', name: 'Amit Verma', email: 'amit@verma.com', mobile: '9555112233', address: 'A-405, Sai Krupa Towers, Nerul', milkName: 'Gold Milk (Premium)', dailyQty: 2, isActive: true },
-  { id: 'c5', name: 'Kiran Yadav', email: 'kiran.yadav@gmail.com', mobile: '8888999900', address: 'Chawl No. 4, Turbhe Store', milkName: 'Cow Milk (Full Cream)', dailyQty: 1, isActive: true },
+  { id: 'c1', name: 'Ramesh Sharma', email: 'ramesh@gmail.com', mobile: '9876543210', address: 'Plot 42, Sector 5, Vashi', subscriptions: [{ milkName: 'Cow Milk (Full Cream)', defaultQty: 2 }], isActive: true },
+  { id: 'c2', name: 'Sanjay Patel', email: 'sanjay.p@gmail.com', mobile: '9822334455', address: 'B-201, Green Heights, Koparkhairane', subscriptions: [{ milkName: 'Buffalo Milk', defaultQty: 1.5 }], isActive: true },
+  { id: 'c3', name: 'Sunita Deshmukh', email: 'sunita.d@gmail.com', mobile: '9123456789', address: 'Row House 3, Sector 12, Sanpada', subscriptions: [{ milkName: 'Taaza Milk (Pouch)', defaultQty: 3 }], isActive: true },
+  { id: 'c4', name: 'Amit Verma', email: 'amit@verma.com', mobile: '9555112233', address: 'A-405, Sai Krupa Towers, Nerul', subscriptions: [{ milkName: 'Gold Milk (Premium)', defaultQty: 2 }], isActive: true },
+  { id: 'c5', name: 'Kiran Yadav', email: 'kiran.yadav@gmail.com', mobile: '8888999900', address: 'Chawl No. 4, Turbhe Store', subscriptions: [{ milkName: 'Cow Milk (Full Cream)', defaultQty: 1 }], isActive: true },
 ];
 
 const initialPayments: Payment[] = [
@@ -155,15 +159,26 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (custError) throw custError;
 
           const mappedCustomers = (customerData || []).map((c: any) => {
-            const milkItem = mappedMilkList.find((m) => m.id === c.milk_item_id);
+            let parsedSubs: MilkSubscription[] = [];
+            try {
+              if (c.subscriptions) {
+                parsedSubs = typeof c.subscriptions === 'string' ? JSON.parse(c.subscriptions) : c.subscriptions;
+              } else {
+                // Fallback to legacy columns
+                const milkItem = mappedMilkList.find((m) => m.id === c.milk_item_id);
+                if (milkItem && c.daily_qty) {
+                  parsedSubs = [{ milkName: milkItem.name, defaultQty: Number(c.daily_qty) }];
+                }
+              }
+            } catch(e) {}
+            
             return {
               id: c.id,
               name: c.name,
               email: c.email || '',
               mobile: c.mobile,
               address: c.address || '',
-              milkName: milkItem ? milkItem.name : '',
-              dailyQty: Number(c.daily_qty),
+              subscriptions: parsedSubs,
               isActive: c.is_active !== false,
             };
           });
@@ -387,7 +402,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const addCustomer = async (cust: Omit<Customer, 'id'>) => {
     if (isSupabaseConfigured) {
       try {
-        const milkItem = milkList.find((m) => m.name === cust.milkName);
+        // Prepare legacy fields for backward compatibility if possible
+        const firstSub = cust.subscriptions.length > 0 ? cust.subscriptions[0] : null;
+        const milkItem = firstSub ? milkList.find((m) => m.name === firstSub.milkName) : null;
+        
         const { data, error } = await supabase
           .from('customers')
           .insert([{
@@ -396,20 +414,25 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             mobile: cust.mobile,
             address: cust.address || null,
             milk_item_id: milkItem ? milkItem.id : null,
-            daily_qty: cust.dailyQty,
+            daily_qty: firstSub ? firstSub.defaultQty : 0,
+            subscriptions: cust.subscriptions,
             is_active: cust.isActive
           }])
           .select();
         if (error) throw error;
         if (data && data[0]) {
+          let parsedSubs = cust.subscriptions;
+          try {
+            if (data[0].subscriptions) parsedSubs = typeof data[0].subscriptions === 'string' ? JSON.parse(data[0].subscriptions) : data[0].subscriptions;
+          } catch(e) {}
+          
           const newCust = {
             id: data[0].id,
             name: data[0].name,
             email: data[0].email || '',
             mobile: data[0].mobile,
             address: data[0].address || '',
-            milkName: cust.milkName,
-            dailyQty: Number(data[0].daily_qty),
+            subscriptions: parsedSubs,
             isActive: data[0].is_active !== false,
           };
           setCustomers((prev) => [...prev, newCust]);
@@ -426,7 +449,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const editCustomer = async (id: string, updated: Omit<Customer, 'id'>) => {
     if (isSupabaseConfigured) {
       try {
-        const milkItem = milkList.find((m) => m.name === updated.milkName);
+        const firstSub = updated.subscriptions.length > 0 ? updated.subscriptions[0] : null;
+        const milkItem = firstSub ? milkList.find((m) => m.name === firstSub.milkName) : null;
+        
         const { error } = await supabase
           .from('customers')
           .update({
@@ -435,7 +460,8 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             mobile: updated.mobile,
             address: updated.address || null,
             milk_item_id: milkItem ? milkItem.id : null,
-            daily_qty: updated.dailyQty,
+            daily_qty: firstSub ? firstSub.defaultQty : 0,
+            subscriptions: updated.subscriptions,
             is_active: updated.isActive
           })
           .eq('id', id);
@@ -505,7 +531,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return {
             delivery_date: dateStr,
             customer_id: d.customerId,
-            milk_item_id: milkItem ? milkItem.id : (cust ? cust.milkName : null),
+            milk_item_id: milkItem ? milkItem.id : null,
             qty: d.qty,
             delivered: d.delivered,
           };
@@ -696,47 +722,88 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const cust = wholesaleCustomers.find(c => c.id === entry.wholesaleCustomerId);
         if (!cust) return;
 
-        // Calculate new balance
-        // Positive balance = they owe us. Advance = negative.
-        const balanceForward = cust.balance + entry.totalBill - entry.amountPaid;
+        // Check for existing entry today
+        const existingEntry = wholesaleDaily.find(d => d.wholesaleCustomerId === entry.wholesaleCustomerId && d.date === entry.date);
 
-        // 1. Insert entry
-        const { data, error } = await supabase
-          .from('wholesale_daily_entries')
-          .insert([{
-            entry_date: entry.date,
-            wholesale_customer_id: entry.wholesaleCustomerId,
-            items: entry.items,
-            total_bill: entry.totalBill,
-            amount_paid: entry.amountPaid,
-            balance_forward: balanceForward
-          }])
-          .select();
-        
-        if (error) throw error;
+        let balanceForward = 0;
+        let diffToBalance = 0;
+        const newBalanceEffect = entry.totalBill - entry.amountPaid;
 
-        // 2. Update customer balance
-        const { error: custError } = await supabase
-          .from('wholesale_customers')
-          .update({ balance: balanceForward })
-          .eq('id', cust.id);
-        
-        if (custError) throw custError;
-
-        if (data && data[0]) {
-          const newEntry: WholesaleDailyEntry = {
-            id: data[0].id,
-            date: data[0].entry_date,
-            wholesaleCustomerId: data[0].wholesale_customer_id,
-            items: typeof data[0].items === 'string' ? JSON.parse(data[0].items) : (data[0].items || []),
-            totalBill: Number(data[0].total_bill),
-            amountPaid: Number(data[0].amount_paid),
-            balanceForward: Number(data[0].balance_forward),
-          };
-          setWholesaleDaily(prev => [...prev, newEntry]);
-          setWholesaleCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, balance: balanceForward } : c));
+        if (existingEntry) {
+          const oldBalanceEffect = existingEntry.totalBill - existingEntry.amountPaid;
+          diffToBalance = newBalanceEffect - oldBalanceEffect;
+          balanceForward = existingEntry.balanceForward + diffToBalance;
+        } else {
+          diffToBalance = newBalanceEffect;
+          balanceForward = cust.balance + newBalanceEffect;
         }
 
+        const newCustomerBalance = cust.balance + diffToBalance;
+
+        if (existingEntry) {
+          // Update existing entry
+          const { error: updError } = await supabase
+            .from('wholesale_daily_entries')
+            .update({
+              items: entry.items,
+              total_bill: entry.totalBill,
+              amount_paid: entry.amountPaid,
+              balance_forward: balanceForward
+            })
+            .eq('id', existingEntry.id);
+          
+          if (updError) throw updError;
+
+          // Update customer balance
+          const { error: custError } = await supabase
+            .from('wholesale_customers')
+            .update({ balance: newCustomerBalance })
+            .eq('id', cust.id);
+          
+          if (custError) throw custError;
+
+          const updatedEntry: WholesaleDailyEntry = { ...existingEntry, ...entry, balanceForward };
+          setWholesaleDaily(prev => prev.map(d => d.id === existingEntry.id ? updatedEntry : d));
+          setWholesaleCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, balance: newCustomerBalance } : c));
+          
+        } else {
+          // Insert new entry
+          const { data, error } = await supabase
+            .from('wholesale_daily_entries')
+            .insert([{
+              entry_date: entry.date,
+              wholesale_customer_id: entry.wholesaleCustomerId,
+              items: entry.items,
+              total_bill: entry.totalBill,
+              amount_paid: entry.amountPaid,
+              balance_forward: balanceForward
+            }])
+            .select();
+          
+          if (error) throw error;
+
+          // Update customer balance
+          const { error: custError } = await supabase
+            .from('wholesale_customers')
+            .update({ balance: newCustomerBalance })
+            .eq('id', cust.id);
+          
+          if (custError) throw custError;
+
+          if (data && data[0]) {
+            const newEntryObj: WholesaleDailyEntry = {
+              id: data[0].id,
+              date: data[0].entry_date,
+              wholesaleCustomerId: data[0].wholesale_customer_id,
+              items: typeof data[0].items === 'string' ? JSON.parse(data[0].items) : (data[0].items || []),
+              totalBill: Number(data[0].total_bill),
+              amountPaid: Number(data[0].amount_paid),
+              balanceForward: Number(data[0].balance_forward),
+            };
+            setWholesaleDaily(prev => [...prev, newEntryObj]);
+            setWholesaleCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, balance: newCustomerBalance } : c));
+          }
+        }
       } catch (err: any) {
         console.error('Error saving wholesale entry:', err);
         alert(`Failed to save daily entry: ${err.message}`);
@@ -745,16 +812,35 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const cust = wholesaleCustomers.find(c => c.id === entry.wholesaleCustomerId);
       if (!cust) return;
 
-      const balanceForward = cust.balance + entry.totalBill - entry.amountPaid;
-      
-      const newEntry: WholesaleDailyEntry = {
-        ...entry,
-        id: 'wde_' + Date.now(),
-        balanceForward,
-      };
-      
-      setWholesaleDaily(prev => [...prev, newEntry]);
-      setWholesaleCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, balance: balanceForward } : c));
+      const existingEntry = wholesaleDaily.find(d => d.wholesaleCustomerId === entry.wholesaleCustomerId && d.date === entry.date);
+
+      let balanceForward = 0;
+      let diffToBalance = 0;
+      const newBalanceEffect = entry.totalBill - entry.amountPaid;
+
+      if (existingEntry) {
+        const oldBalanceEffect = existingEntry.totalBill - existingEntry.amountPaid;
+        diffToBalance = newBalanceEffect - oldBalanceEffect;
+        balanceForward = existingEntry.balanceForward + diffToBalance;
+      } else {
+        diffToBalance = newBalanceEffect;
+        balanceForward = cust.balance + newBalanceEffect;
+      }
+
+      const newCustomerBalance = cust.balance + diffToBalance;
+
+      if (existingEntry) {
+        const updatedEntry: WholesaleDailyEntry = { ...existingEntry, ...entry, balanceForward };
+        setWholesaleDaily(prev => prev.map(d => d.id === existingEntry.id ? updatedEntry : d));
+      } else {
+        const newEntryObj: WholesaleDailyEntry = {
+          ...entry,
+          id: 'wde_' + Date.now(),
+          balanceForward,
+        };
+        setWholesaleDaily(prev => [...prev, newEntryObj]);
+      }
+      setWholesaleCustomers(prev => prev.map(c => c.id === cust.id ? { ...c, balance: newCustomerBalance } : c));
     }
   };
 

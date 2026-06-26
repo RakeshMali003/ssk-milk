@@ -38,9 +38,13 @@ const Dashboard: React.FC = () => {
 
   const retailDailyRev = useMemo(() => {
     return customers.reduce((acc, customer) => {
-      const milk = milkList.find((m) => m.name === customer.milkName);
-      const price = milk ? milk.price : 0;
-      return acc + customer.dailyQty * price;
+      let dailyTotal = 0;
+      customer.subscriptions?.forEach(sub => {
+        const milk = milkList.find((m) => m.name === sub.milkName);
+        const price = milk ? milk.price : 0;
+        dailyTotal += sub.defaultQty * price;
+      });
+      return acc + dailyTotal;
     }, 0);
   }, [customers, milkList]);
 
@@ -58,7 +62,9 @@ const Dashboard: React.FC = () => {
   const milkShareData = useMemo(() => {
     const counts: { [name: string]: number } = {};
     customers.forEach((c) => {
-      counts[c.milkName] = (counts[c.milkName] || 0) + c.dailyQty;
+      c.subscriptions?.forEach(sub => {
+        counts[sub.milkName] = (counts[sub.milkName] || 0) + sub.defaultQty;
+      });
     });
 
     const totalQty = Object.values(counts).reduce((a, b) => a + b, 0);

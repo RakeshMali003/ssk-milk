@@ -94,7 +94,6 @@ function App() {
                 minHeight: '100vh',
                 width: { md: `calc(100% - ${drawerWidth}px)` },
                 mt: { xs: 7, md: 0 },
-                overflowX: 'hidden',
               }}
             >
               <Routes>

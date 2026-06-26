@@ -11,6 +11,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+import SearchIcon from '@mui/icons-material/Search';
 
 const WholesaleCustomers: React.FC = () => {
   const { wholesaleCustomers, milkList, addWholesaleCustomer, editWholesaleCustomer, deleteWholesaleCustomer, wholesaleDaily } = useStore();
@@ -22,6 +23,7 @@ const WholesaleCustomers: React.FC = () => {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [selectedHistoryCustomer, setSelectedHistoryCustomer] = useState<WholesaleCustomer | null>(null);
   const [historyMonth, setHistoryMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
@@ -33,6 +35,11 @@ const WholesaleCustomers: React.FC = () => {
   const [isActive, setIsActive] = useState(true);
 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+
+  const filteredCustomers = wholesaleCustomers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.mobile.includes(searchTerm)
+  );
 
   const handleOpen = (item?: WholesaleCustomer) => {
     if (item) {
@@ -162,17 +169,38 @@ const WholesaleCustomers: React.FC = () => {
         </Button>
       </Box>
 
+      {/* Search Bar */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search buyers by name or mobile..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: '15px', bgcolor: '#fff' }
+            }
+          }}
+        />
+      </Box>
+
       <Grid container spacing={3}>
-        {wholesaleCustomers.length === 0 ? (
+        {filteredCustomers.length === 0 ? (
           <Grid size={{ xs: 12 }}>
             <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
               <Typography sx={{ color: 'text.secondary' }}>No wholesale customers registered yet.</Typography>
             </Box>
           </Grid>
         ) : (
-          wholesaleCustomers.map((c) => (
+          filteredCustomers.map((c) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={c.id}>
-              <Card sx={{ borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Card sx={{ borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid rgba(0,0,0,0.05)', bgcolor: 'rgba(0,0,0,0.01)' }}>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>{c.name}</Typography>
@@ -369,7 +397,7 @@ const WholesaleCustomers: React.FC = () => {
             <Grid container spacing={2}>
               {historyData.map((row) => (
                 <Grid size={{ xs: 12 }} key={row.id}>
-                  <Card sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
+                  <Card sx={{ borderRadius: '15px', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
                     <Box sx={{ p: 2, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.05)', bgcolor: 'rgba(0,0,0,0.01)' }}>
                       <Typography sx={{ fontWeight: 800, color: 'text.primary' }}>
                         {row.date ? format(new Date(row.date), 'EEEE, dd MMM yyyy') : 'Unknown Date'}

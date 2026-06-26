@@ -2,34 +2,49 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useStore, type WholesaleCustomer, type WholesaleDailyEntryItem } from '../context/StoreContext';
 import { format } from 'date-fns';
 import {
-  Box, Typography, Button, TextField, IconButton, Grid, Card, CardContent, Divider, Chip, Paper
+  Box, Typography, Button, TextField, IconButton, Grid, Card, CardContent, Divider, Chip, Paper, InputAdornment
 } from '@mui/material';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import SearchIcon from '@mui/icons-material/Search';
 
 const WholesaleDaily: React.FC = () => {
-  const { wholesaleCustomers, milkList, saveWholesaleDailyEntry } = useStore();
+  const { wholesaleCustomers, milkList, saveWholesaleDailyEntry, wholesaleDaily } = useStore();
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [searchTerm, setSearchTerm] = useState('');
   
   // Local state for the inputs: { customerId: { [milkName]: qty, paid } }
   const [inputs, setInputs] = useState<{ [id: string]: { qtys: { [milk: string]: string }, paid: string } }>({});
 
   const activeCustomers = wholesaleCustomers.filter(c => c.isActive);
 
+  const filteredCustomers = activeCustomers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.mobile.includes(searchTerm)
+  );
+
   useEffect(() => {
-    // Initialize inputs when date changes or customers load
+    // Initialize inputs when date changes, customers load, or wholesaleDaily updates
     const newInputs: any = {};
     activeCustomers.forEach(c => {
-      if (!inputs[c.id]) {
-        const defaultQtys: any = {};
-        milkList.forEach(m => defaultQtys[m.name] = '');
-        newInputs[c.id] = { qtys: defaultQtys, paid: '' };
-      } else {
-        newInputs[c.id] = inputs[c.id];
+      const existingEntry = wholesaleDaily.find(d => d.wholesaleCustomerId === c.id && d.date === date);
+      
+      const defaultQtys: any = {};
+      milkList.forEach(m => defaultQtys[m.name] = '');
+      let paid = '';
+
+      if (existingEntry) {
+        existingEntry.items.forEach(item => {
+          defaultQtys[item.milkName] = item.qty.toString();
+        });
+        if (existingEntry.amountPaid > 0) {
+          paid = existingEntry.amountPaid.toString();
+        }
       }
+      newInputs[c.id] = { qtys: defaultQtys, paid };
     });
     setInputs(newInputs);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wholesaleCustomers.length, milkList.length, date]);
+  }, [wholesaleCustomers.length, milkList.length, date, wholesaleDaily]);
 
   const { todayTotalQty, todayTotalAmount } = useMemo(() => {
     let qty = 0;
@@ -108,14 +123,6 @@ const WholesaleDaily: React.FC = () => {
       amountPaid: paidNum,
     });
 
-    // Clear inputs after save
-    const clearedQtys: any = {};
-    milkList.forEach(m => clearedQtys[m.name] = '');
-    setInputs(prev => ({
-      ...prev,
-      [customer.id]: { qtys: clearedQtys, paid: '' }
-    }));
-    
     alert(`Saved entry for ${customer.name}`);
   };
 
@@ -160,17 +167,38 @@ ${balanceText}
         />
       </Box>
 
+      {/* Search Bar */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search buyers by name or mobile..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: '15px', bgcolor: '#fff' }
+            }
+          }}
+        />
+      </Box>
+
       <Grid container spacing={3}>
-        {activeCustomers.length === 0 ? (
+        {filteredCustomers.length === 0 ? (
           <Grid size={{ xs: 12 }}>
             <Box sx={{ p: 4, textAlign: 'center', background: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
               <Typography color="text.secondary">No active wholesale customers found.</Typography>
             </Box>
           </Grid>
         ) : (
-          activeCustomers.map((c) => (
+          filteredCustomers.map((c) => (
             <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={c.id}>
-              <Card sx={{ borderRadius: 4, boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
+              <Card sx={{ borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.06)' }}>
                 <Box sx={{ p: 2.5, background: 'rgba(0,0,0,0.01)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>{c.name}</Typography>
@@ -218,7 +246,40 @@ ${balanceText}
                       />
                     </Grid>
                   </Grid>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mt: 3 }}>
+                    <Box>
+                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>Total Qty: {
+                        (() => {
+                          const custInputs = inputs[c.id];
+                          let qty = 0;
+                          if (custInputs) {
+                            milkList.forEach(m => {
+                              const q = parseFloat(custInputs.qtys[m.name] || '0');
+                              if (q > 0) qty += q;
+                            });
+                          }
+                          return qty;
+                        })()
+                      } Ltr</Typography>
+                      <Typography sx={{ fontWeight: 800, color: 'error.main' }}>
+                        Bill Amount: ₹{
+                          (() => {
+                            const custInputs = inputs[c.id];
+                            let amount = 0;
+                            if (custInputs) {
+                              milkList.forEach(m => {
+                                const q = parseFloat(custInputs.qtys[m.name] || '0');
+                                if (q > 0) {
+                                  const rate = c.pricing[m.name] || m.price;
+                                  amount += (q * rate);
+                                }
+                              });
+                            }
+                            return amount;
+                          })()
+                        }
+                      </Typography>
+                    </Box>
                     <Button 
                       variant="contained" 
                       onClick={() => handleSaveEntry(c)}

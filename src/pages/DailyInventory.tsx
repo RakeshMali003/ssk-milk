@@ -22,6 +22,8 @@ import {
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
 
 const DailyInventory: React.FC = () => {
   const { t } = useTranslation();
@@ -30,6 +32,7 @@ const DailyInventory: React.FC = () => {
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Load existing records or populate from customers template
   useEffect(() => {
@@ -38,13 +41,19 @@ const DailyInventory: React.FC = () => {
     } else {
       // Map customer templates, excluding inactive ones
       const activeCustomers = customers.filter(c => c.isActive);
-      const defaults = activeCustomers.map((c) => ({
-        customerId: c.id,
-        customerName: c.name,
-        milkName: c.milkName,
-        qty: c.dailyQty,
-        delivered: true, // Default to true for convenience, can be unchecked
-      }));
+      const defaults = activeCustomers.flatMap((c) => {
+        const subs = c.subscriptions && c.subscriptions.length > 0 
+          ? c.subscriptions 
+          : [{ milkName: 'Unknown', defaultQty: 0 }];
+        
+        return subs.map(sub => ({
+          customerId: c.id,
+          customerName: c.name,
+          milkName: sub.milkName,
+          qty: sub.defaultQty,
+          delivered: true,
+        }));
+      });
       setDeliveries(defaults);
     }
   }, [date, customers, dailyRecords]);
@@ -116,6 +125,27 @@ const DailyInventory: React.FC = () => {
         </Box>
       </Box>
 
+      {/* Search Bar */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder={t('daily.search_placeholder') || "Search by customer name..."}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 3, bgcolor: '#fff' }
+            }
+          }}
+        />
+      </Box>
+
       {/* Daily guide banner */}
       <Card
         sx={{
@@ -164,8 +194,9 @@ const DailyInventory: React.FC = () => {
               </TableRow>
             ) : (
               deliveries.map((d, index) => (
+                d.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ? (
                 <TableRow
-                  key={d.customerId}
+                  key={`${d.customerId}_${d.milkName}_${index}`}
                   sx={{
                     backgroundColor: d.delivered ? 'transparent' : 'rgba(231, 76, 60, 0.01)',
                     '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.01)' },
@@ -217,6 +248,7 @@ const DailyInventory: React.FC = () => {
                     </Box>
                   </TableCell>
                 </TableRow>
+                ) : null
               ))
             )}
           </TableBody>
@@ -232,7 +264,8 @@ const DailyInventory: React.FC = () => {
           </Box>
         ) : (
           deliveries.map((d, index) => (
-            <Card key={d.customerId} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', backgroundColor: d.delivered ? '#ffffff' : 'rgba(231, 76, 60, 0.02)' }}>
+            d.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ? (
+            <Card key={`${d.customerId}_${d.milkName}_${index}`} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)', backgroundColor: d.delivered ? '#ffffff' : 'rgba(231, 76, 60, 0.02)' }}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box>
@@ -284,6 +317,7 @@ const DailyInventory: React.FC = () => {
                 </Box>
               </CardContent>
             </Card>
+            ) : null
           ))
         )}
       </Box>

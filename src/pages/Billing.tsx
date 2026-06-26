@@ -30,6 +30,8 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
 
 const Billing: React.FC = () => {
   const { customers, milkList, dailyRecords, payments, clearTable } = useStore();
@@ -37,6 +39,66 @@ const Billing: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Bulk Generate Bills state
+  const [generateBillsOpen, setGenerateBillsOpen] = useState(false);
+  const [generateMonth, setGenerateMonth] = useState(format(new Date(), 'yyyy-MM'));
+
+  const { addPayment } = useStore();
+
+  const generatedBillsPreview = useMemo(() => {
+    if (!generateBillsOpen) return [];
+    const gMonthStart = startOfMonth(parseISO(`${generateMonth}-01`));
+    const gMonthEnd = endOfMonth(parseISO(`${generateMonth}-01`));
+
+    return customers.map(customer => {
+      const billNoteString = `System Generated Bill (${format(parseISO(`${generateMonth}-01`), 'MMM yyyy')})`;
+      const hasGeneratedBill = payments.some(p => 
+        p.customerId === customer.id && p.notes?.includes(billNoteString)
+      );
+
+      if (hasGeneratedBill) {
+        return { customerId: customer.id, customerName: customer.name, amount: 0 };
+      }
+
+      let totalAmount = 0;
+      Object.keys(dailyRecords).forEach(dateStr => {
+        const dateObj = parseISO(dateStr);
+        if (isWithinInterval(dateObj, { start: gMonthStart, end: gMonthEnd })) {
+          const recordList = dailyRecords[dateStr];
+          const custRecords = recordList.filter(r => r.customerId === customer.id);
+          
+          custRecords.forEach(custRecord => {
+            if (custRecord.delivered) {
+              const milkItem = milkList.find(m => m.name === custRecord.milkName);
+              const price = milkItem ? milkItem.price : 0;
+              totalAmount += custRecord.qty * price;
+            }
+          });
+        }
+      });
+      return { customerId: customer.id, customerName: customer.name, amount: totalAmount };
+    }).filter(b => b.amount > 0);
+  }, [generateBillsOpen, generateMonth, customers, dailyRecords, milkList]);
+
+  const handleConfirmGenerateBills = () => {
+    if (window.confirm(`Are you sure you want to generate ${generatedBillsPreview.length} unpaid bills for ${format(parseISO(`${generateMonth}-01`), 'MMM yyyy')}?`)) {
+      generatedBillsPreview.forEach(bill => {
+        addPayment({
+          customerId: bill.customerId,
+          customerName: bill.customerName,
+          amount: bill.amount,
+          date: new Date().toISOString(),
+          status: 'unpaid',
+          method: 'cash',
+          notes: `System Generated Bill (${format(parseISO(`${generateMonth}-01`), 'MMM yyyy')})`
+        });
+      });
+      setGenerateBillsOpen(false);
+      alert('Bills generated successfully! You can view them in the Payments section.');
+    }
+  };
 
   // Generate Date boundaries for selected month
   const monthStart = startOfMonth(parseISO(`${selectedMonth}-01`));
@@ -54,23 +116,25 @@ const Billing: React.FC = () => {
         const dateObj = parseISO(dateStr);
         if (isWithinInterval(dateObj, { start: monthStart, end: monthEnd })) {
           const recordList = dailyRecords[dateStr];
-          const custRecord = recordList.find(r => r.customerId === customer.id);
+          const custRecords = recordList.filter(r => r.customerId === customer.id);
           
-          if (custRecord && custRecord.delivered) {
-            const milkItem = milkList.find(m => m.name === custRecord.milkName);
-            const price = milkItem ? milkItem.price : 0;
-            const amount = custRecord.qty * price;
+          custRecords.forEach(custRecord => {
+            if (custRecord.delivered) {
+              const milkItem = milkList.find(m => m.name === custRecord.milkName);
+              const price = milkItem ? milkItem.price : 0;
+              const amount = custRecord.qty * price;
 
-            totalAmount += amount;
-            totalQty += custRecord.qty;
-            dailyEntries.push({
-              date: dateStr,
-              qty: custRecord.qty,
-              amount: amount,
-              price: price,
-              milkName: custRecord.milkName,
-            });
-          }
+              totalAmount += amount;
+              totalQty += custRecord.qty;
+              dailyEntries.push({
+                date: dateStr,
+                qty: custRecord.qty,
+                amount: amount,
+                price: price,
+                milkName: custRecord.milkName,
+              });
+            }
+          });
         }
       });
 
@@ -86,8 +150,11 @@ const Billing: React.FC = () => {
         dailyEntries,
         custPayments,
       };
-    });
-  }, [customers, dailyRecords, milkList, monthStart, monthEnd, payments, selectedMonth]);
+    }).filter(bill => 
+      bill.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      bill.customer.mobile.includes(searchTerm)
+    );
+  }, [customers, dailyRecords, milkList, monthStart, monthEnd, payments, selectedMonth, searchTerm]);
 
   const handleOpenDetails = (customerInfo: any) => {
     setSelectedCustomer(customerInfo);
@@ -231,8 +298,8 @@ const Billing: React.FC = () => {
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "italic");
     doc.setFontSize(14);
-    doc.text("Shree Sai Krupa", 150, currentY + 15);
-    doc.setFont("helvetica", "normal");
+    doc.text("Savalram Mali", 150, currentY + 15);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.text("Authorized Signatory", 150, currentY + 20);
 
@@ -283,6 +350,22 @@ Please share a screenshot of the payment.
 
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
           <Button
+            variant="contained"
+            startIcon={<ReceiptLongIcon />}
+            onClick={() => setGenerateBillsOpen(true)}
+            size="small"
+            sx={{
+              borderRadius: 3,
+              px: 3,
+              py: 1.5,
+              background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
+              fontWeight: 700,
+              boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
+            }}
+          >
+            Generate Bills
+          </Button>
+          <Button
             variant="outlined"
             startIcon={<DeleteSweepIcon />}
             onClick={async () => {
@@ -312,6 +395,27 @@ Please share a screenshot of the payment.
             }}
           />
         </Box>
+      </Box>
+
+      {/* Search Bar */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search bills by customer name or mobile..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 3, bgcolor: '#fff' }
+            }
+          }}
+        />
       </Box>
 
       {/* Desktop Table */}
@@ -528,6 +632,79 @@ Please share a screenshot of the payment.
             </DialogActions>
           </>
         )}
+      </Dialog>
+
+      {/* Generate Bills Dialog */}
+      <Dialog
+        open={generateBillsOpen}
+        onClose={() => setGenerateBillsOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        slotProps={{
+          paper: {
+            sx: {
+              background: '#ffffff',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              borderRadius: 4,
+              p: 2,
+              boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
+            }
+          }
+        }}
+      >
+        <DialogTitle sx={{ color: 'text.primary', fontWeight: 800 }}>
+          Generate Monthly Bills
+        </DialogTitle>
+        <DialogContent sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            This will calculate the unbilled delivery amount for the selected month and automatically add them as 'Unpaid' records in the ledger.
+          </Typography>
+          <TextField
+            fullWidth
+            type="month"
+            label="Select Billing Month"
+            value={generateMonth}
+            onChange={(e) => setGenerateMonth(e.target.value)}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
+
+          <Box sx={{ mt: 2, maxHeight: 300, overflowY: 'auto' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+              Preview Bills to Generate ({generatedBillsPreview.length})
+            </Typography>
+            {generatedBillsPreview.length === 0 ? (
+              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                No bills to generate for this month.
+              </Typography>
+            ) : (
+              generatedBillsPreview.map((bill, i) => (
+                <Box key={i} sx={{ display: 'flex', justifyContent: 'space-between', p: 1, borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+                  <Typography variant="body2">{bill.customerName}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: '#c62828' }}>₹{bill.amount}</Typography>
+                </Box>
+              ))
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setGenerateBillsOpen(false)} sx={{ color: 'text.secondary', fontWeight: 600 }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmGenerateBills}
+            variant="contained"
+            disabled={generatedBillsPreview.length === 0}
+            sx={{
+              borderRadius: 3,
+              px: 3,
+              background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
+              fontWeight: 700,
+              boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
+            }}
+          >
+            Confirm & Generate
+          </Button>
+        </DialogActions>
       </Dialog>
 
     </Box>

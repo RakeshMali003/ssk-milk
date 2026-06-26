@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore, type Payment } from '../context/StoreContext';
+import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import {
   Box,
   Typography,
@@ -33,10 +34,11 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircle';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const PaymentHistory: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { payments, customers, addPayment, updatePaymentStatus } = useStore();
+  const { payments, customers, addPayment, updatePaymentStatus, dailyRecords, milkList } = useStore();
   const [open, setOpen] = useState(false);
 
   // Filter and pagination states
@@ -164,22 +166,24 @@ const PaymentHistory: React.FC = () => {
             {t('payments.subtitle')}
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpen}
-          size="small"
-          sx={{
-            borderRadius: 2,
-            px: 2,
-            py: 1,
-            background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
-            fontWeight: 700,
-            boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
-          }}
-        >
-          {t('payments.add_payment')}
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleOpen}
+            size="small"
+            sx={{
+              borderRadius: 2,
+              px: 2,
+              py: 1,
+              background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
+              fontWeight: 700,
+              boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
+            }}
+          >
+            {t('payments.add_payment')}
+          </Button>
+        </Box>
       </Box>
 
       {/* Guide notes */}
@@ -584,6 +588,7 @@ const PaymentHistory: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
     </Box>
   );
 };

@@ -2,8 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useStore, type Customer, type WholesaleCustomer, type WholesaleDailyEntry } from '../context/StoreContext';
 import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import {
-  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Select, MenuItem, FormControl, InputLabel, Card, CardContent
+  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Select, MenuItem, FormControl, InputLabel, Card, CardContent, Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -15,6 +16,8 @@ const CustomerPortal: React.FC = () => {
   const customerType = sessionStorage.getItem('ssk_customer_type'); // 'retail' | 'wholesale'
 
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
+  const [openPdfDialog, setOpenPdfDialog] = useState(false);
 
   // Get current customer
   const customer = useMemo(() => {
@@ -56,14 +59,28 @@ const CustomerPortal: React.FC = () => {
 
   const totalPendingAmount = useMemo(() => {
     if (retailCustomer) {
-      return payments
-        .filter(p => p.customerId === customer?.id && (p.status === 'pending' || p.status === 'unpaid'))
+      // Calculate all-time billed amount
+      const totalBilled = Object.keys(dailyRecords).reduce((acc, dateStr) => {
+        const entry = dailyRecords[dateStr].find(d => d.customerId === customer?.id);
+        if (entry && entry.delivered) {
+           const milkItem = milkList.find(m => m.name === entry.milkName);
+           const price = milkItem ? milkItem.price : 0;
+           return acc + (entry.qty * price);
+        }
+        return acc;
+      }, 0);
+      
+      // Calculate all-time completed payments
+      const totalPaid = payments
+        .filter(p => p.customerId === customer?.id && p.status === 'completed')
         .reduce((acc, p) => acc + p.amount, 0);
+        
+      return totalBilled - totalPaid;
     } else if (wholesaleCustomer) {
       return wholesaleCustomer.balance;
     }
     return 0;
-  }, [customer, retailCustomer, wholesaleCustomer, payments]);
+  }, [customer, retailCustomer, wholesaleCustomer, monthlyData, payments, selectedMonth]);
 
   const totalMonthlyAmount = useMemo(() => {
     if (retailCustomer) {
@@ -74,7 +91,7 @@ const CustomerPortal: React.FC = () => {
     return 0;
   }, [monthlyData, retailCustomer, wholesaleCustomer]);
 
-  const generatePDF = () => {
+  const generatePDF = (action: 'download' | 'view' = 'download') => {
     if (!customer) return;
     const doc = new jsPDF();
     const invoiceDate = format(new Date(), 'dd MMM yyyy');
@@ -194,10 +211,20 @@ const CustomerPortal: React.FC = () => {
     doc.text('Online Payment (PhonePe): 9898801505', 14, currentY);
     doc.text('Note: Please pay within 5 days.', 14, currentY + 5);
     
+    doc.setTextColor(0, 0, 0);
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(14);
+    doc.text("Savalram Mali", 150, currentY);
     doc.setFont("helvetica", "bold");
-    doc.text('Authorized Signatory', 160, currentY + 5);
+    doc.setFontSize(10);
+    doc.text('Authorized Signatory', 150, currentY + 5);
 
-    doc.save(`Invoice_${customer.name.replace(/ /g, '_')}_${selectedMonth}.pdf`);
+    if (action === 'download') {
+      doc.save(`Invoice_${customer.name.replace(/ /g, '_')}_${selectedMonth}.pdf`);
+    } else {
+      setPdfDataUri(doc.output('datauristring'));
+      setOpenPdfDialog(true);
+    }
   };
 
   const handleLogout = () => {
@@ -230,20 +257,30 @@ const CustomerPortal: React.FC = () => {
         </Button>
       </Box>
 
-      <Card sx={{ mb: 4, background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)', color: '#fff', borderRadius: 4 }}>
-        <CardContent sx={{ p: 4, textAlign: 'center' }}>
-          <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 1.5, opacity: 0.9 }}>
+      <Card sx={{ mb: 4, background: '#ffffff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 4, boxShadow: '0 10px 30px rgba(0,0,0,0.02)' }}>
+        <Box sx={{ p: 4, textAlign: 'center', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+          <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 1.5, color: 'text.secondary' }}>
             TOTAL PENDING AMOUNT
           </Typography>
-          <Typography variant="h2" sx={{ fontWeight: 800, mt: 1 }}>
+          <Typography variant="h2" sx={{ fontWeight: 800, mt: 1, color: totalPendingAmount > 0 ? '#e74c3c' : (totalPendingAmount < 0 ? '#2ecc71' : 'text.primary') }}>
             ₹{totalPendingAmount > 0 ? totalPendingAmount : 0}
           </Typography>
           {totalPendingAmount < 0 && (
-            <Typography variant="body1" sx={{ mt: 1, opacity: 0.9 }}>
-              Advance: ₹{Math.abs(totalPendingAmount)}
+            <Typography variant="body1" sx={{ mt: 1, color: '#2ecc71', fontWeight: 600 }}>
+              Advance Balance: ₹{Math.abs(totalPendingAmount)}
             </Typography>
           )}
-        </CardContent>
+        </Box>
+        <Box sx={{ background: 'rgba(0,114,255,0.02)', p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>SHREE SAI KRUPA</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>Kirana & Milk Store</Typography>
+          </Box>
+          <Box sx={{ textAlign: 'right' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>Authorized Signatory</Typography>
+            <Typography variant="body1" sx={{ fontFamily: 'cursive', fontStyle: 'italic', color: '#0072FF', fontWeight: 600 }}>Savalram Mali</Typography>
+          </Box>
+        </Box>
       </Card>
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 3 }}>
@@ -264,14 +301,24 @@ const CustomerPortal: React.FC = () => {
           </Select>
         </FormControl>
 
-        <Button
-          variant="contained"
-          startIcon={<PictureAsPdfIcon />}
-          onClick={generatePDF}
-          sx={{ borderRadius: 2, background: '#2ecc71', '&:hover': { background: '#27ae60' } }}
-        >
-          Download PDF Bill
-        </Button>
+        <Box>
+          <Button
+            variant="outlined"
+            startIcon={<VisibilityIcon />}
+            onClick={() => generatePDF('view')}
+            sx={{ borderRadius: 2, mr: 2 }}
+          >
+            View PDF
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<PictureAsPdfIcon />}
+            onClick={() => generatePDF('download')}
+            sx={{ borderRadius: 2, background: '#2ecc71', '&:hover': { background: '#27ae60' } }}
+          >
+            Download
+          </Button>
+        </Box>
       </Box>
 
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -337,6 +384,19 @@ const CustomerPortal: React.FC = () => {
           ))
         )}
       </Box>
+
+      {/* PDF Viewer Dialog */}
+      <Dialog open={openPdfDialog} onClose={() => setOpenPdfDialog(false)} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" sx={{ fontWeight: 800 }}>Bill Details (PDF)</Typography>
+          <Button onClick={() => setOpenPdfDialog(false)} color="inherit">Close</Button>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, height: '75vh', overflow: 'hidden' }}>
+          {pdfDataUri && (
+            <iframe src={pdfDataUri} width="100%" height="100%" style={{ border: 'none' }} title="PDF Bill" />
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useStore, type Customer } from '../context/StoreContext';
+import { useStore, type Customer, type MilkSubscription } from '../context/StoreContext';
 import {
   Box,
   Typography,
@@ -41,6 +41,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import SearchIcon from '@mui/icons-material/Search';
 
 const CustomerInventory: React.FC = () => {
   const { t } = useTranslation();
@@ -54,12 +55,19 @@ const CustomerInventory: React.FC = () => {
   const [email, setEmail] = useState('');
   const [mobile, setMobile] = useState('');
   const [address, setAddress] = useState('');
-  const [milkName, setMilkName] = useState('');
-  const [dailyQty, setDailyQty] = useState('');
+  const [subscriptions, setSubscriptions] = useState<MilkSubscription[]>([]);
   const [isActive, setIsActive] = useState(true);
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Form validations
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+
+  const filteredCustomers = customers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    c.mobile.includes(searchTerm)
+  );
 
   const handleOpen = (item?: Customer) => {
     if (item) {
@@ -68,8 +76,7 @@ const CustomerInventory: React.FC = () => {
       setEmail(item.email);
       setMobile(item.mobile);
       setAddress(item.address);
-      setMilkName(item.milkName);
-      setDailyQty(item.dailyQty.toString());
+      setSubscriptions(item.subscriptions && item.subscriptions.length > 0 ? item.subscriptions : [{ milkName: milkList.length > 0 ? milkList[0].name : '', defaultQty: 1 }]);
       setIsActive(item.isActive);
     } else {
       setEditingItem(null);
@@ -77,8 +84,7 @@ const CustomerInventory: React.FC = () => {
       setEmail('');
       setMobile('');
       setAddress('');
-      setMilkName(milkList.length > 0 ? milkList[0].name : '');
-      setDailyQty('1');
+      setSubscriptions([{ milkName: milkList.length > 0 ? milkList[0].name : '', defaultQty: 1 }]);
       setIsActive(true);
     }
     setErrors({});
@@ -94,10 +100,12 @@ const CustomerInventory: React.FC = () => {
     if (!name.trim()) tempErrors.name = true;
     if (!mobile.trim()) tempErrors.mobile = true;
     if (!address.trim()) tempErrors.address = true;
-    if (!milkName) tempErrors.milkName = true;
-
-    const qtyNum = parseFloat(dailyQty);
-    if (isNaN(qtyNum) || qtyNum <= 0) tempErrors.dailyQty = true;
+    
+    if (subscriptions.length === 0) tempErrors.subscriptions = true;
+    subscriptions.forEach((sub, idx) => {
+      if (!sub.milkName) tempErrors[`milkName_${idx}`] = true;
+      if (isNaN(sub.defaultQty) || sub.defaultQty <= 0) tempErrors[`qty_${idx}`] = true;
+    });
 
     if (Object.keys(tempErrors).length > 0) {
       setErrors(tempErrors);
@@ -109,8 +117,7 @@ const CustomerInventory: React.FC = () => {
       email,
       mobile,
       address,
-      milkName,
-      dailyQty: qtyNum,
+      subscriptions,
       isActive,
     };
 
@@ -180,6 +187,27 @@ const CustomerInventory: React.FC = () => {
         </Box>
       </Box>
 
+      {/* Search Bar */}
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search customers by name or mobile..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 3, bgcolor: '#fff' }
+            }
+          }}
+        />
+      </Box>
+
       {/* Onboarding tips */}
       <Card
         sx={{
@@ -225,14 +253,14 @@ const CustomerInventory: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {customers.length === 0 ? (
+            {filteredCustomers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ color: 'text.secondary', py: 4 }}>
-                  No customers registered yet. Click 'Add Customer' to start.
+                  No customers found.
                 </TableCell>
               </TableRow>
             ) : (
-              customers.map((c) => (
+              filteredCustomers.map((c) => (
                 <TableRow
                   key={c.id}
                   sx={{
@@ -252,8 +280,12 @@ const CustomerInventory: React.FC = () => {
                   <TableCell sx={{ color: 'text.secondary', maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {c.address}
                   </TableCell>
-                  <TableCell sx={{ color: '#0072FF', fontWeight: 600 }}>{c.milkName}</TableCell>
-                  <TableCell sx={{ color: 'text.primary', fontWeight: 700 }}>{c.dailyQty} Pcs/Ltr</TableCell>
+                  <TableCell sx={{ color: '#0072FF', fontWeight: 600 }}>
+                    {c.subscriptions.map(s => <div key={s.milkName}>{s.milkName}</div>)}
+                  </TableCell>
+                  <TableCell sx={{ color: 'text.primary', fontWeight: 700 }}>
+                    {c.subscriptions.map(s => <div key={s.milkName}>{s.defaultQty} Ltr</div>)}
+                  </TableCell>
                   <TableCell>
                     <Chip 
                       label={c.isActive ? 'Active' : 'Inactive'} 
@@ -280,12 +312,12 @@ const CustomerInventory: React.FC = () => {
 
       {/* Mobile Cards */}
       <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
-        {customers.length === 0 ? (
+        {filteredCustomers.length === 0 ? (
           <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
-            <Typography sx={{ color: 'text.secondary' }}>No customers registered yet. Click 'Add Customer' to start.</Typography>
+            <Typography sx={{ color: 'text.secondary' }}>No customers found.</Typography>
           </Box>
         ) : (
-          customers.map((c) => (
+          filteredCustomers.map((c) => (
             <Card key={c.id} sx={{ borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.05)' }}>
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
@@ -307,11 +339,11 @@ const CustomerInventory: React.FC = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'rgba(0,0,0,0.02)', p: 1, borderRadius: 2, mb: 1.5 }}>
                   <Box>
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>MILK PREF</Typography>
-                    <Typography sx={{ color: '#0072FF', fontWeight: 700, fontSize: '0.85rem' }}>{c.milkName}</Typography>
+                    {c.subscriptions.map(s => <Typography key={s.milkName} sx={{ color: '#0072FF', fontWeight: 700, fontSize: '0.85rem' }}>{s.milkName}</Typography>)}
                   </Box>
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 700, display: 'block' }}>DAILY QTY</Typography>
-                    <Typography sx={{ color: 'text.primary', fontWeight: 800, fontSize: '0.85rem' }}>{c.dailyQty} Pcs/Ltr</Typography>
+                    {c.subscriptions.map(s => <Typography key={s.milkName} sx={{ color: 'text.primary', fontWeight: 800, fontSize: '0.85rem' }}>{s.defaultQty} Ltr</Typography>)}
                   </Box>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid rgba(0,0,0,0.04)', pt: 1 }}>
@@ -446,46 +478,64 @@ const CustomerInventory: React.FC = () => {
             Delivery Settings
           </Typography>
 
-          <FormControl fullWidth error={errors.milkName}>
-            <InputLabel id="milk-label">{t('customer.preferred_milk')}</InputLabel>
-            <Select
-              labelId="milk-label"
-              value={milkName}
-              label={t('customer.preferred_milk')}
-              onChange={(e) => setMilkName(e.target.value)}
-              startAdornment={
-                <InputAdornment position="start" sx={{ mr: 1 }}>
-                  <WaterDropIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              }
-            >
-              {milkList.map((m) => (
-                <MenuItem key={m.id} value={m.name}>
-                  {m.name} (₹{m.price}/Ltr)
-                </MenuItem>
-              ))}
-            </Select>
-            {errors.milkName && <FormHelperText>Select Preferred Milk</FormHelperText>}
-          </FormControl>
-
-          <TextField
-            fullWidth
-            label={t('customer.daily_qty')}
-            type="number"
-            value={dailyQty}
-            onChange={(e) => setDailyQty(e.target.value)}
-            error={errors.dailyQty}
-            helperText={errors.dailyQty ? t('customer.qty_required') : ''}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <ShoppingCartIcon sx={{ color: 'rgba(0,0,0,0.4)' }} />
-                  </InputAdornment>
-                ),
-              }
-            }}
-          />
+          {errors.subscriptions && <FormHelperText error>At least one milk subscription is required.</FormHelperText>}
+          
+          {subscriptions.map((sub, index) => (
+            <Box key={index} sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+              <FormControl sx={{ flex: 2 }} error={errors[`milkName_${index}`]}>
+                <InputLabel>{t('customer.preferred_milk')}</InputLabel>
+                <Select
+                  value={sub.milkName}
+                  label={t('customer.preferred_milk')}
+                  onChange={(e) => {
+                    const newSubs = [...subscriptions];
+                    newSubs[index].milkName = e.target.value;
+                    setSubscriptions(newSubs);
+                  }}
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ mr: 1 }}>
+                      <WaterDropIcon sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  }
+                >
+                  {milkList.map((m) => (
+                    <MenuItem key={m.id} value={m.name}>
+                      {m.name} (₹{m.price}/Ltr)
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <TextField
+                sx={{ flex: 1 }}
+                label="Qty"
+                type="number"
+                value={sub.defaultQty}
+                onChange={(e) => {
+                  const newSubs = [...subscriptions];
+                  newSubs[index].defaultQty = parseFloat(e.target.value) || 0;
+                  setSubscriptions(newSubs);
+                }}
+                error={errors[`qty_${index}`]}
+              />
+              
+              <IconButton 
+                color="error" 
+                onClick={() => setSubscriptions(subscriptions.filter((_, i) => i !== index))}
+                sx={{ mt: 1 }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
+          
+          <Button 
+            startIcon={<AddIcon />} 
+            onClick={() => setSubscriptions([...subscriptions, { milkName: milkList.length > 0 ? milkList[0].name : '', defaultQty: 1 }])}
+            sx={{ alignSelf: 'flex-start', fontWeight: 600 }}
+          >
+            Add Milk Type
+          </Button>
 
           <Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.08)' }} />
           <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'primary.main', textTransform: 'uppercase', letterSpacing: 1 }}>
