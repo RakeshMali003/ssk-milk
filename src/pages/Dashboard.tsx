@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '../context/StoreContext';
 import { format, subDays } from 'date-fns';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 import {
   Box,
   Grid,
@@ -12,6 +13,7 @@ import {
   CardContent,
   Avatar,
   Divider,
+  Rating,
 } from '@mui/material';
 import PeopleIcon from '@mui/icons-material/People';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
@@ -22,11 +24,36 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircle';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
+import StarIcon from '@mui/icons-material/Star';
+
+interface Review {
+  id: string;
+  customer_name: string;
+  rating: number;
+  comment: string;
+}
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { customers, milkList, dailyRecords, payments, wholesaleCustomers, wholesaleDaily } = useStore();
+
+  const [recentReviews, setRecentReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    if (isSupabaseConfigured) {
+      supabase
+        .from('customer_reviews')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5)
+        .then(({ data, error }) => {
+          if (!error && data) {
+            setRecentReviews(data);
+          }
+        });
+    }
+  }, []);
 
   const todayStr = format(new Date(), 'yyyy-MM-dd');
   const todayDeliveries = dailyRecords[todayStr] || [];
@@ -663,6 +690,30 @@ const Dashboard: React.FC = () => {
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Recent Reviews Section */}
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+           Recent Customer Reviews
+        </Typography>
+        {recentReviews.length === 0 ? (
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>No reviews yet.</Typography>
+        ) : (
+          <Grid container spacing={2}>
+            {recentReviews.map((rev) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={rev.id}>
+                <Card sx={{ borderRadius: 3, p: 2, height: '100%', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{rev.customer_name || 'Anonymous'}</Typography>
+                  <Rating value={rev.rating} readOnly size="small" sx={{ my: 1 }} />
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
+                    {rev.comment ? `"${rev.comment}"` : "No comment left"}
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        )}
+      </Box>
     </Box>
   );
 };

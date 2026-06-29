@@ -316,21 +316,28 @@ const Billing: React.FC = () => {
     const cust = custBill.customer;
     const formattedMobile = cust.mobile.startsWith('91') ? cust.mobile : `91${cust.mobile}`;
     const monthName = format(parseISO(`${selectedMonth}-01`), 'MMMM yyyy');
-    
-    const message = `नमस्ते *${cust.name}*, 
-यह आपका *${monthName}* का दूध का बिल है।
-*कुल मात्रा:* ${custBill.totalQty} Ltrs/Pcs
-*कुल राशि (Total Amount):* ₹${custBill.totalAmount}
+    const message = `Hello *${cust.name}*,
 
-कृपया इस संदेश के साथ भेजे गए PDF बिल की जांच करें।
+This is your *${monthName}* milk bill.
+
+*Total Quantity:* ${custBill.totalQty} Ltrs/Pcs
+*Total Amount:* ₹${custBill.totalAmount}
+
+Please check the PDF bill attached with this message.
 
 *Online Payment (PhonePe):* 9898801505
 
-*NOTE:* Please pay the payment within 5 days. Do not delay.
-Please share a screenshot of the payment.
+📊 To view your complete monthly report and order history:
+https://sskmilk.vercel.app/
 
-धन्यवाद!
-*श्री साई कृपा किराना स्टोर*`;
+Log in using your mobile number to access your full history.
+
+*NOTE:* Please make the payment within 5 days. Kindly avoid delays.
+After making the payment, please share a screenshot for confirmation.
+
+Thank you!
+
+*Shree Sai Krupa Kirana Store*`;
 
     const url = `https://wa.me/${formattedMobile}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');

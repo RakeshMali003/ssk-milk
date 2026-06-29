@@ -97,6 +97,42 @@ const Login: React.FC = () => {
 
     if (matchedCust) {
       setError('');
+      if (isSupabaseConfigured) {
+        // 1. Insert into historical log
+        supabase.from('user_login_logs').insert([{
+          mobile_no: mobile,
+          device_details: navigator.userAgent
+        }]).then();
+
+        // 2. Upsert into activity tracker for dashboard
+        supabase.rpc('upsert_user_activity', {
+          p_mobile_no: mobile,
+          p_customer_name: matchedCust.name,
+          p_device_details: navigator.userAgent
+        }).then(({ error }) => {
+           if (error) {
+              // Fallback if RPC fails, we can just select and update
+              supabase.from('user_activity').select('visit_count').eq('mobile_no', mobile).single().then(({ data }) => {
+                 if (data) {
+                    supabase.from('user_activity').update({
+                       last_device_details: navigator.userAgent,
+                       last_login_time: new Date().toISOString(),
+                       visit_count: data.visit_count + 1,
+                       customer_name: matchedCust.name
+                    }).eq('mobile_no', mobile).then();
+                 } else {
+                    supabase.from('user_activity').insert([{
+                       mobile_no: mobile,
+                       customer_name: matchedCust.name,
+                       last_device_details: navigator.userAgent,
+                       last_login_time: new Date().toISOString(),
+                       visit_count: 1
+                    }]).then();
+                 }
+              });
+           }
+        });
+      }
       sessionStorage.setItem('ssk_auth_role', 'customer');
       sessionStorage.setItem('ssk_customer_id', matchedCust.id);
       sessionStorage.setItem('ssk_customer_type', type);

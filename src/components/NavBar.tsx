@@ -24,6 +24,7 @@ import StoreIcon from '@mui/icons-material/Store';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LanguageIcon from '@mui/icons-material/Language';
+import StarIcon from '@mui/icons-material/Star';
 
 import { useStore } from '../context/StoreContext';
 
@@ -60,6 +61,8 @@ const NavBar: React.FC<NavBarProps> = ({ mobileOpen, handleDrawerToggle }) => {
     { text: t('navbar.sales_report'), icon: <TrendingUpIcon />, path: '/sales' },
     { text: t('navbar.payment_history'), icon: <PaymentIcon />, path: '/payments' },
     { text: 'Billing', icon: <ReceiptLongIcon />, path: '/billing' },
+    { text: 'User Logins', icon: <ListAltIcon />, path: '/user-logins' },
+    { text: 'Customer Reviews', icon: <StarIcon />, path: '/reviews' },
   ];
 
   const drawerContent = (

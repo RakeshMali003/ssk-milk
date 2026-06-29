@@ -1,13 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { useStore, type Customer, type WholesaleCustomer, type WholesaleDailyEntry } from '../context/StoreContext';
-import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, isWithinInterval, subMonths } from 'date-fns';
 import {
-  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Select, MenuItem, FormControl, InputLabel, Card, CardContent, Dialog, DialogTitle, DialogContent
+  Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Select, MenuItem, FormControl, InputLabel, Card, CardContent, Dialog, DialogTitle, DialogContent, Chip, Collapse, IconButton, Divider
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import ReviewPopup from '../components/ReviewPopup';
 
 const CustomerPortal: React.FC = () => {
   const { customers, wholesaleCustomers, dailyRecords, wholesaleDaily, milkList, payments } = useStore();
@@ -18,6 +21,8 @@ const CustomerPortal: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
   const [openPdfDialog, setOpenPdfDialog] = useState(false);
+  const [showFullHistory, setShowFullHistory] = useState(false);
+  const [expandedMonth, setExpandedMonth] = useState<string | null>(null);
 
   // Get current customer
   const customer = useMemo(() => {
@@ -90,6 +95,11 @@ const CustomerPortal: React.FC = () => {
     }
     return 0;
   }, [monthlyData, retailCustomer, wholesaleCustomer]);
+
+  const currentMonthPayment = useMemo(() => {
+    if (!customer) return null;
+    return payments.find(p => p.customerId === customer.id && p.date.startsWith(selectedMonth) && p.status === 'completed');
+  }, [payments, customer, selectedMonth]);
 
   const generatePDF = (action: 'download' | 'view' = 'download') => {
     if (!customer) return;
@@ -283,107 +293,180 @@ const CustomerPortal: React.FC = () => {
         </Box>
       </Card>
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 3 }}>
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Select Month</InputLabel>
-          <Select
-            value={selectedMonth}
-            label="Select Month"
-            onChange={(e) => setSelectedMonth(e.target.value)}
-          >
-            {[...Array(6)].map((_, i) => {
-              const d = new Date();
-              d.setMonth(d.getMonth() - i);
-              const val = format(d, 'yyyy-MM');
-              const label = format(d, 'MMMM yyyy');
-              return <MenuItem key={val} value={val}>{label}</MenuItem>;
-            })}
-          </Select>
-        </FormControl>
-
-        <Box>
-          <Button
-            variant="outlined"
-            startIcon={<VisibilityIcon />}
-            onClick={() => generatePDF('view')}
-            sx={{ borderRadius: 2, mr: 2 }}
-          >
-            View PDF
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={() => generatePDF('download')}
-            sx={{ borderRadius: 2, background: '#2ecc71', '&:hover': { background: '#27ae60' } }}
-          >
-            Download
-          </Button>
-        </Box>
-      </Box>
-
-      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-      <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
-        <Table>
-          <TableHead sx={{ background: 'rgba(0,0,0,0.02)' }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Details</TableCell>
-              {wholesaleCustomer && <TableCell sx={{ fontWeight: 700 }}>Bill Amount</TableCell>}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {monthlyData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={3} align="center" sx={{ py: 4, color: 'text.secondary' }}>
-                  No deliveries found for this month.
-                </TableCell>
-              </TableRow>
-            ) : (
-              (monthlyData as any[]).map((row, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{format(parseISO(row.date), 'dd MMM yyyy')}</TableCell>
-                  <TableCell>
-                    {retailCustomer 
-                      ? `${row.qty} Ltr` 
-                      : row.items.map((i: any) => `${i.qty}L ${i.milkName}`).join(', ')
-                    }
-                  </TableCell>
-                  {wholesaleCustomer && (
-                    <TableCell sx={{ fontWeight: 600 }}>₹{row.totalBill}</TableCell>
-                  )}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      </Box>
-
-      {/* Mobile Cards */}
-      <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 1.5 }}>
-        {monthlyData.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
-            <Typography sx={{ color: 'text.secondary' }}>No deliveries found for this month.</Typography>
+      {!showFullHistory ? (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', mb: 3 }}>
+            <FormControl sx={{ minWidth: 200, display: customerType === 'wholesale' ? 'block' : 'none' }}>
+              <InputLabel>Select Month</InputLabel>
+              <Select
+                value={selectedMonth}
+                label="Select Month"
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              >
+                {[...Array(6)].map((_, i) => {
+                  const d = new Date();
+                  d.setMonth(d.getMonth() - i);
+                  const val = format(d, 'yyyy-MM');
+                  const label = format(d, 'MMMM yyyy');
+                  return <MenuItem key={val} value={val}>{label}</MenuItem>;
+                })}
+              </Select>
+            </FormControl>
+            <Box>
+              <Button
+                variant="outlined"
+                onClick={() => setShowFullHistory(true)}
+                sx={{ borderRadius: 2, mr: 2 }}
+              >
+                See Full Monthly Report & History
+              </Button>
+            </Box>
           </Box>
-        ) : (
-          (monthlyData as any[]).map((row, idx) => (
-            <Card key={idx} variant="outlined" sx={{ borderRadius: 3 }}>
-              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{format(parseISO(row.date), 'dd MMM yyyy')}</Typography>
-                  {wholesaleCustomer && <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#2ecc71' }}>₹{row.totalBill}</Typography>}
-                </Box>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  {retailCustomer 
-                    ? `${row.qty} Ltr` 
-                    : row.items.map((i: any) => `${i.qty}L ${i.milkName}`).join(', ')
-                  }
-                </Typography>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </Box>
+
+          {/* Current View (Retail vs Wholesale) */}
+          {retailCustomer ? (
+             <Card sx={{ mt: 2, p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+               {currentMonthPayment ? (
+                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                   <CheckCircleIcon sx={{ color: '#2ecc71' }} />
+                   <Typography variant="body1" sx={{ color: '#2ecc71', fontWeight: 800 }}>
+                     Payment Clear — ₹{currentMonthPayment.amount} paid on {format(parseISO(currentMonthPayment.date), 'dd MMM yyyy')}
+                   </Typography>
+                 </Box>
+               ) : (
+                 <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ color: '#e74c3c', fontWeight: 800 }}>
+                      Current Pending Amount: ₹{totalPendingAmount > 0 ? totalPendingAmount : 0}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
+                      Note: When the next month's bill is generated, the previous pending amount will carry forward.
+                    </Typography>
+                 </Box>
+               )}
+             </Card>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {monthlyData.length === 0 ? (
+                <Card sx={{ p: 4, textAlign: 'center' }}>
+                  <Typography color="text.secondary">No wholesale deliveries this month.</Typography>
+                </Card>
+              ) : (
+                (monthlyData as WholesaleDailyEntry[]).map((entry, idx) => (
+                  <Card key={idx} variant="outlined" sx={{ borderRadius: 3, p: 0, overflow: 'hidden' }}>
+                    <Box sx={{ bgcolor: 'rgba(0,114,255,0.04)', p: 2, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#0072FF' }}>
+                        {format(parseISO(entry.date), 'EEEE, dd MMM yyyy')}
+                      </Typography>
+                    </Box>
+                    <CardContent sx={{ p: 2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, mb: 2, color: entry.balanceForward > 0 ? '#e74c3c' : (entry.balanceForward < 0 ? '#2ecc71' : 'text.primary') }}>
+                        C/F Balance: ₹{Math.abs(entry.balanceForward)} {entry.balanceForward > 0 ? '(Pending)' : entry.balanceForward < 0 ? '(Advance)' : ''}
+                      </Typography>
+                      
+                      <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: 1 }}>ITEMS DELIVERED</Typography>
+                      <Box sx={{ mb: 2, mt: 0.5 }}>
+                        {entry.items.map((item, i) => (
+                          <Typography key={i} variant="body2">{item.qty}L {item.milkName}</Typography>
+                        ))}
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                         <Typography variant="body2" sx={{ fontWeight: 800 }}>TODAY'S BILL</Typography>
+                         <Typography variant="body2" sx={{ fontWeight: 800, color: '#e74c3c' }}>+ ₹{entry.totalBill}</Typography>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                         <Typography variant="body2" sx={{ fontWeight: 800 }}>AMOUNT PAID</Typography>
+                         <Typography variant="body2" sx={{ fontWeight: 800, color: '#2ecc71' }}>- ₹{entry.amountPaid}</Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </Box>
+          )}
+        </>
+      ) : (
+        /* Full History View (Iterating past 6 months) */
+        <Box>
+           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 800 }}>Monthly History</Typography>
+              <Button variant="text" onClick={() => setShowFullHistory(false)}>Back to Current</Button>
+           </Box>
+
+           {[...Array(6)].map((_, i) => {
+             const mDate = subMonths(new Date(), i);
+             const mStr = format(mDate, 'yyyy-MM');
+             const mLabel = format(mDate, 'MMMM yyyy');
+             
+             // Check if paid
+             const mPayment = payments.find(p => p.customerId === customer.id && p.date.startsWith(mStr) && p.status === 'completed');
+             const isPaid = !!mPayment;
+
+             return (
+               <Card key={mStr} sx={{ mb: 2, borderRadius: 3, border: '1px solid rgba(0,0,0,0.05)' }}>
+                 <Box 
+                   sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', bgcolor: expandedMonth === mStr ? 'rgba(0,0,0,0.02)' : 'transparent' }}
+                   onClick={() => {
+                     setExpandedMonth(expandedMonth === mStr ? null : mStr);
+                     setSelectedMonth(mStr);
+                   }}
+                 >
+                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                     <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>{mLabel}</Typography>
+                     {isPaid ? (
+                       <Chip label="Paid" color="success" size="small" sx={{ fontWeight: 700 }} />
+                     ) : (
+                       <Chip label="Pending" color="error" size="small" sx={{ fontWeight: 700 }} />
+                     )}
+                   </Box>
+                   <IconButton size="small">
+                     <ExpandMoreIcon sx={{ transform: expandedMonth === mStr ? 'rotate(180deg)' : 'none', transition: '0.3s' }} />
+                   </IconButton>
+                 </Box>
+                 <Collapse in={expandedMonth === mStr}>
+                   <Divider />
+                   <Box sx={{ p: 2 }}>
+                      <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                        <Button variant="outlined" size="small" startIcon={<VisibilityIcon />} onClick={() => generatePDF('view')}>View PDF</Button>
+                        <Button variant="contained" size="small" startIcon={<PictureAsPdfIcon />} onClick={() => generatePDF('download')}>Download</Button>
+                      </Box>
+                      
+                      <TableContainer component={Paper} variant="outlined">
+                        <Table size="small">
+                          <TableHead sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                            <TableRow>
+                              <TableCell sx={{ fontWeight: 700 }}>Date</TableCell>
+                              <TableCell sx={{ fontWeight: 700 }}>Details</TableCell>
+                              {wholesaleCustomer && <TableCell sx={{ fontWeight: 700 }}>Amount</TableCell>}
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {monthlyData.length === 0 ? (
+                               <TableRow><TableCell colSpan={3} align="center">No records for {mLabel}</TableCell></TableRow>
+                            ) : (
+                               (monthlyData as any[]).map((row, idx) => (
+                                 <TableRow key={idx}>
+                                   <TableCell>{format(parseISO(row.date), 'dd MMM')}</TableCell>
+                                   <TableCell>
+                                     {retailCustomer ? `${row.qty} Ltr` : row.items.map((i:any) => `${i.qty}L ${i.milkName}`).join(', ')}
+                                   </TableCell>
+                                   {wholesaleCustomer && <TableCell>₹{row.totalBill}</TableCell>}
+                                 </TableRow>
+                               ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                   </Box>
+                 </Collapse>
+               </Card>
+             );
+           })}
+        </Box>
+      )}
 
       {/* PDF Viewer Dialog */}
       <Dialog open={openPdfDialog} onClose={() => setOpenPdfDialog(false)} maxWidth="md" fullWidth>
@@ -397,6 +480,7 @@ const CustomerPortal: React.FC = () => {
           )}
         </DialogContent>
       </Dialog>
+      <ReviewPopup customerId={customer.id} customerName={customer.name} />
     </Box>
   );
 };

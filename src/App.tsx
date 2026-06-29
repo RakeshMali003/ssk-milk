@@ -13,6 +13,8 @@ import Billing from './pages/Billing';
 import WholesaleCustomers from './pages/WholesaleCustomers';
 import WholesaleDaily from './pages/WholesaleDaily';
 import CustomerPortal from './pages/CustomerPortal';
+import UserLogins from './pages/UserLogins';
+import Reviews from './pages/Reviews';
 import { Box, AppBar, Toolbar, IconButton, CssBaseline } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
@@ -106,6 +108,8 @@ function App() {
                 <Route path="/billing" element={<Billing />} />
                 <Route path="/wholesale-customers" element={<WholesaleCustomers />} />
                 <Route path="/wholesale-daily" element={<WholesaleDaily />} />
+                <Route path="/user-logins" element={<UserLogins />} />
+                <Route path="/reviews" element={<Reviews />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Box>
