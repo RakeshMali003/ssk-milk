@@ -24,7 +24,6 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircle';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
-import StarIcon from '@mui/icons-material/Star';
 
 interface Review {
   id: string;

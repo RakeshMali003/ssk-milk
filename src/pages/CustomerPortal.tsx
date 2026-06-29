@@ -306,6 +306,8 @@ const CustomerPortal: React.FC = () => {
                 {[...Array(6)].map((_, i) => {
                   const d = new Date();
                   d.setMonth(d.getMonth() - i);
+                  return d;
+                }).filter(d => d.getFullYear() > 2026 || (d.getFullYear() === 2026 && d.getMonth() >= 5)).map(d => {
                   const val = format(d, 'yyyy-MM');
                   const label = format(d, 'MMMM yyyy');
                   return <MenuItem key={val} value={val}>{label}</MenuItem>;
@@ -398,6 +400,8 @@ const CustomerPortal: React.FC = () => {
 
            {[...Array(6)].map((_, i) => {
              const mDate = subMonths(new Date(), i);
+             return mDate;
+           }).filter(d => d.getFullYear() > 2026 || (d.getFullYear() === 2026 && d.getMonth() >= 5)).map(mDate => {
              const mStr = format(mDate, 'yyyy-MM');
              const mLabel = format(mDate, 'MMMM yyyy');
              

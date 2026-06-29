@@ -11,7 +11,6 @@ import {
   Box
 } from '@mui/material';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
-import { useStore, type Customer, type WholesaleCustomer } from '../context/StoreContext';
 
 interface ReviewPopupProps {
   customerId: string;
@@ -82,7 +81,7 @@ const ReviewPopup: React.FC<ReviewPopupProps> = ({ customerId, customerName }) =
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Rating
             value={rating}
-            onChange={(event, newValue) => {
+            onChange={(_, newValue) => {
               setRating(newValue);
             }}
             size="large"
