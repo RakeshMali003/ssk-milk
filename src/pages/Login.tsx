@@ -228,6 +228,7 @@ const Login: React.FC = () => {
                 right: 16,
                 color: '#0072FF',
                 bgcolor: 'rgba(0, 114, 255, 0.08)',
+                display: { xs: 'none', md: 'inline-flex' },
                 '&:hover': { bgcolor: 'rgba(0, 114, 255, 0.15)' },
               }}
             >
@@ -341,6 +342,7 @@ const Login: React.FC = () => {
                 <Box component="form" onSubmit={handleCustomerLogin}>
                   <TextField
                     fullWidth
+                    type="tel"
                     label="Registered Mobile Number"
                     variant="outlined"
                     margin="normal"
@@ -379,6 +381,20 @@ const Login: React.FC = () => {
                   >
                     View My Bill
                   </Button>
+                  <Box sx={{ mt: 3, textAlign: 'left', bgcolor: 'rgba(0,0,0,0.02)', p: 2, borderRadius: 2, border: '1px solid rgba(0,0,0,0.05)' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+                      Login Instructions:
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                      1. Open the Customer Portal on your mobile device.
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
+                      2. Enter your registered mobile number.
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      3. Verify using OTP and access your account.
+                    </Typography>
+                  </Box>
                 </Box>
               )}
             </Box>

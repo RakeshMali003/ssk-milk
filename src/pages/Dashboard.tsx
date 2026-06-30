@@ -645,11 +645,11 @@ const Dashboard: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              p: 4,
+              p: { xs: 2.5, md: 3 },
               height: '100%',
               background: '#ffffff',
               border: '1px solid rgba(0, 0, 0, 0.06)',
-              borderRadius: 4,
+              borderRadius: '20px',
               boxShadow: '0 10px 30px rgba(0,0,0,0.01)',
             }}
           >
@@ -659,9 +659,9 @@ const Dashboard: React.FC = () => {
 
             <Box
               sx={{
-                p: 3,
-                mb: 3,
-                borderRadius: 3,
+                p: 2,
+                mb: 2,
+                borderRadius: '16px',
                 bgcolor: pendingPaymentsCount > 0 ? 'rgba(231, 76, 60, 0.08)' : 'rgba(46, 204, 113, 0.08)',
                 border: pendingPaymentsCount > 0 ? '1px solid rgba(231, 76, 60, 0.2)' : '1px solid rgba(46, 204, 113, 0.2)',
               }}
@@ -671,9 +671,9 @@ const Dashboard: React.FC = () => {
               </Typography>
             </Box>
 
-            <Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.06)', mb: 3 }} />
+            <Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.06)', mb: 2 }} />
 
-            <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 800, mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ color: 'text.secondary', fontWeight: 800, mb: 1.5 }}>
               Quick Ledger Stats
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

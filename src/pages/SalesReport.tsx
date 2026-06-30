@@ -337,8 +337,12 @@ const SalesReport: React.FC = () => {
           <TableBody>
             {filteredSales.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ color: 'text.secondary', py: 4 }}>
-                  No sales found matching search parameters.
+                <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
+                    <InfoOutlinedIcon sx={{ fontSize: 48, mb: 2, color: 'text.secondary' }} />
+                    <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 700 }}>No sales found matching search parameters.</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>Try adjusting your filters or search terms.</Typography>
+                  </Box>
                 </TableCell>
               </TableRow>
             ) : (
@@ -367,8 +371,12 @@ const SalesReport: React.FC = () => {
       {/* Mobile Cards */}
       <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
         {filteredSales.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
-            <Typography sx={{ color: 'text.secondary' }}>No sales found matching search parameters.</Typography>
+          <Box sx={{ p: 6, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
+              <InfoOutlinedIcon sx={{ fontSize: 48, mb: 2, color: 'text.secondary' }} />
+              <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 700 }}>No sales found</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>Try adjusting your filters.</Typography>
+            </Box>
           </Box>
         ) : (
           paginatedSales.map((item, index) => (

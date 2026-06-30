@@ -283,7 +283,15 @@ ${balanceText}
                     <Button 
                       variant="contained" 
                       onClick={() => handleSaveEntry(c)}
-                      sx={{ borderRadius: 2, background: '#0072FF', textTransform: 'none', px: 4, py: 1, fontWeight: 700 }}
+                      sx={{
+                        borderRadius: 2,
+                        background: 'linear-gradient(135deg, #00C6FF 0%, #0072FF 100%)',
+                        textTransform: 'none',
+                        px: 4,
+                        py: 1,
+                        fontWeight: 700,
+                        boxShadow: '0 4px 15px rgba(0, 114, 255, 0.2)',
+                      }}
                     >
                       Save Entry
                     </Button>

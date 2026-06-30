@@ -146,7 +146,25 @@ const PaymentHistory: React.FC = () => {
     const cleanMobile = mobile.replace(/\D/g, '');
     const formattedMobile = cleanMobile.length === 10 ? '91' + cleanMobile : cleanMobile;
 
-    const enMessage = `Dear *${p.customerName}*, this is a friendly reminder from *Shree Sai Krupa Kirana Store*. Your milk delivery payment of *₹${p.amount}* is pending. Kindly clear the dues via UPI or Cash. Thank you!`;
+    const enMessage = `Hello *${p.customerName}*,
+
+Greetings from *Shree Sai Krupa Kirana Store*.
+
+*Total Pending Amount:* ₹${p.amount}
+
+Please make the payment at your earliest convenience.
+
+*Online Payment (PhonePe):* 9898801505
+
+📊 To view your complete purchase and payment history, please visit the Customer Portal:
+https://sskmilk.vercel.app/ 
+
+*Login Instructions:*
+1. Open the Customer Portal on your mobile device.
+2. Enter your registered mobile number.
+3. Verify using OTP and access your account.
+
+Thank you for your support!`;
     const hiMessage = `नमस्ते *${p.customerName}*, *श्री साई कृपा किराना स्टोर* की ओर से एक विनम्र अनुस्मारक। आपका दूध का बकाया भुगतान *₹${p.amount}* अभी लंबित है। कृपया यूपीआई या नकद के माध्यम से भुगतान करें। धन्यवाद!`;
 
     const message = i18n.language === 'hi' ? hiMessage : enMessage;
@@ -270,8 +288,12 @@ const PaymentHistory: React.FC = () => {
           <TableBody>
             {filteredPayments.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ color: 'text.secondary', py: 4 }}>
-                  No payment ledger transactions logged yet.
+                <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
+                    <PaymentsIcon sx={{ fontSize: 48, mb: 2, color: 'text.secondary' }} />
+                    <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 700 }}>No payment ledger transactions logged yet.</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>Add a payment or adjust your filters.</Typography>
+                  </Box>
                 </TableCell>
               </TableRow>
             ) : (
@@ -378,8 +400,12 @@ const PaymentHistory: React.FC = () => {
       {/* Mobile Cards */}
       <Box sx={{ display: { xs: 'flex', md: 'none' }, flexDirection: 'column', gap: 2 }}>
         {filteredPayments.length === 0 ? (
-          <Box sx={{ p: 4, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
-            <Typography sx={{ color: 'text.secondary' }}>No payment ledger transactions logged yet.</Typography>
+          <Box sx={{ p: 6, textAlign: 'center', bgcolor: '#fff', borderRadius: 4, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.6 }}>
+              <PaymentsIcon sx={{ fontSize: 48, mb: 2, color: 'text.secondary' }} />
+              <Typography variant="h6" sx={{ color: 'text.secondary', fontWeight: 700 }}>No transactions</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>Add a payment to get started.</Typography>
+            </Box>
           </Box>
         ) : (
           paginatedPayments.map((p) => (
