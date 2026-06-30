@@ -1,42 +1,21 @@
-const CACHE_NAME = 'ssk-dairy-cache-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/logo.png'
-];
-
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
-  );
-});
-
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response; // Return from cache if found
-        }
-        return fetch(event.request); // Fallback to network
-      })
-  );
+  self.skipWaiting(); // Force the waiting service worker to become the active service worker
 });
 
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  // Clear all old caches
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
+          return caches.delete(cacheName);
         })
       );
-    })
+    }).then(() => self.clients.claim()) // Take control of all clients immediately
   );
+});
+
+self.addEventListener('fetch', event => {
+  // Just pass through all requests to network to ensure fresh data and prevent blank screens
+  event.respondWith(fetch(event.request));
 });
