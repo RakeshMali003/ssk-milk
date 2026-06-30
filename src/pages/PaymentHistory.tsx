@@ -150,22 +150,30 @@ const PaymentHistory: React.FC = () => {
 
 Greetings from *Shree Sai Krupa Kirana Store*.
 
-*Total Pending Amount:* ₹${p.amount}
+*Total Pending Amount: ₹${p.amount}*
 
 Please make the payment at your earliest convenience.
 
-*Online Payment (PhonePe):* 9898801505
+*Online Payment (PhonePe): 9898801505*
 
 📊 To view your complete purchase and payment history, please visit the Customer Portal:
 https://sskmilk.vercel.app/ 
 
 *Login Instructions:*
-1. Open the Customer Portal on your mobile device.
-2. Enter your registered mobile number.
-3. Verify using OTP and access your account.
+Open the Customer Portal on your mobile device.
+Enter your registered mobile number.
 
-Thank you for your support!`;
-    const hiMessage = `नमस्ते *${p.customerName}*, *श्री साई कृपा किराना स्टोर* की ओर से एक विनम्र अनुस्मारक। आपका दूध का बकाया भुगतान *₹${p.amount}* अभी लंबित है। कृपया यूपीआई या नकद के माध्यम से भुगतान करें। धन्यवाद!`;
+*Thank you for your support!*`;
+
+    const hiMessage = `नमस्ते *${p.customerName}*,
+श्री साई कृपा किराना स्टोर की ओर से,
+
+*कुल बकाया (Pending): ₹${p.amount}*
+
+कृपया समय पर भुगतान करें।
+*Online Payment (PhonePe): 9898801505*
+
+*धन्यवाद!*`;
 
     const message = i18n.language === 'hi' ? hiMessage : enMessage;
     const url = `https://wa.me/${formattedMobile}?text=${encodeURIComponent(message)}`;

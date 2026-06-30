@@ -129,18 +129,27 @@ const WholesaleDaily: React.FC = () => {
   const sendWhatsApp = (c: WholesaleCustomer) => {
     const formattedMobile = c.mobile.startsWith('91') ? c.mobile : `91${c.mobile}`;
     const balanceText = c.balance > 0 
-      ? `*कुल बकाया (Pending):* ₹${c.balance}` 
-      : (c.balance < 0 ? `*अग्रिम (Advance):* ₹${Math.abs(c.balance)}` : `*कोई बकाया नहीं (Cleared)*`);
+      ? `*Total Pending Amount: ₹${c.balance}*` 
+      : (c.balance < 0 ? `*Advance Amount: ₹${Math.abs(c.balance)}*` : `*No dues pending (Cleared)*`);
 
-    const message = `नमस्ते *${c.name}*,
-श्री साई कृपा किराना स्टोर की ओर से,
+    const message = `Hello *${c.name}*,
+
+Greetings from *Shree Sai Krupa Kirana Store*.
 
 ${balanceText}
 
-कृपया समय पर भुगतान करें।
-*Online Payment (PhonePe):* 9898801505
+Please make the payment at your earliest convenience.
 
-धन्यवाद!`;
+*Online Payment (PhonePe): 9898801505*
+
+📊 To view your complete purchase and payment history, please visit the Customer Portal:
+https://sskmilk.vercel.app/ 
+
+*Login Instructions:*
+Open the Customer Portal on your mobile device.
+Enter your registered mobile number.
+
+*Thank you for your support!*`;
 
     const url = `https://wa.me/${formattedMobile}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');

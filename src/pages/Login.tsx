@@ -386,13 +386,10 @@ const Login: React.FC = () => {
                       Login Instructions:
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
-                      1. Open the Customer Portal on your mobile device.
+                      Open the Customer Portal on your mobile device.
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 0.5 }}>
-                      2. Enter your registered mobile number.
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      3. Verify using OTP and access your account.
+                      Enter your registered mobile number.
                     </Typography>
                   </Box>
                 </Box>
