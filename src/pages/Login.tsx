@@ -40,6 +40,37 @@ const Login: React.FC = () => {
   
   const [error, setError] = useState('');
 
+  // PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    setDeferredPrompt(null);
+    setIsInstallable(false);
+  };
+
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'hi' : 'en';
     i18n.changeLanguage(newLang);
@@ -244,6 +275,31 @@ const Login: React.FC = () => {
                   {t('login.subtitle')}
                 </Typography>
               </Box>
+
+              {isInstallable && (
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={handleInstallClick}
+                  sx={{
+                    mb: 3,
+                    py: 1.5,
+                    borderRadius: 2,
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    borderColor: '#0072FF',
+                    color: '#0072FF',
+                    borderWidth: 2,
+                    '&:hover': {
+                      borderWidth: 2,
+                      bgcolor: 'rgba(0, 114, 255, 0.05)',
+                    },
+                  }}
+                >
+                  📱 Install SSK Milk App
+                </Button>
+              )}
 
               <Tabs 
                 value={tabIndex} 
